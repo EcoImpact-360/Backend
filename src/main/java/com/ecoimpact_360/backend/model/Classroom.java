@@ -25,7 +25,6 @@ public class Classroom {
 
     @NotBlank
     private String name;
-
     private Integer score = 0;
 
     @ManyToOne

@@ -41,11 +41,9 @@ public class WasteEntry {
     @NotNull
     @Positive
     private Double quantityKg;
-
     private Double co2Equivalent;
 
     @Enumerated(EnumType.STRING)
     private WasteStatus status = WasteStatus.PENDING;
-
     private LocalDateTime createdAt;
 }

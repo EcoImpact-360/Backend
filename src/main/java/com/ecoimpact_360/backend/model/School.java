@@ -27,7 +27,6 @@ public class School {
 
     @NotBlank
     private String name;
-
     private String city;
 
     @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)

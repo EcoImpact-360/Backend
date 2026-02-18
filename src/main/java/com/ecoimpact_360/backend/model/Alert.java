@@ -38,7 +38,6 @@ public class Alert {
 
     @Enumerated(EnumType.STRING)
     private AlertType alertType;
-
     private Double totalKg;
     private Boolean resolved = false;
     private LocalDateTime createdAt;
