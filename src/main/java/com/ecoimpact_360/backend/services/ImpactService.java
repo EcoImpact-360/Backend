@@ -1,4 +1,4 @@
-package com.services;
+package com.ecoimpact_360.backend.services;
 
 import org.springframework.stereotype.Service;
 
