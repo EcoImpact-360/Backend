@@ -1,4 +1,4 @@
-package com.model.enums;
+package com.ecoimpact_360.demo.model.enums;
 
 public enum WasteCategory {
     PLASTIC,
