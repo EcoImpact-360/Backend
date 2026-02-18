@@ -1,15 +1,15 @@
 package com.ecoimpact_360.backend.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-public record WasteEntryRequestDTO(
-    @NotNull Long classroomId,
-    @NotNull Long wasteTypeId,
-    @Positive Double quantityKg,
-    String observation
-) {}
-
-
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class WasteEntryRequestDTO {
+    private Long classroomId;
+    private Long wasteTypeId;
+    private Double quantityKg;
+}
 
