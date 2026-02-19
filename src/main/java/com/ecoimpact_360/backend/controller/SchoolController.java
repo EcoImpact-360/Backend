@@ -26,4 +26,10 @@ public class SchoolController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping
+    public ResponseEntity<School> createSchool(@RequestBody School school) {
+        School savedSchool = schoolRepository.save(school);
+        return ResponseEntity.ok(savedSchool);
+    }
 }
