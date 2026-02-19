@@ -12,7 +12,7 @@ import com.ecoimpact_360.backend.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/dashboard")
+@RequestMapping("/api/v1/dashboard")
 @RequiredArgsConstructor
 public class DashboardController {
 

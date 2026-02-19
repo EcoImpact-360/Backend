@@ -1,4 +1,4 @@
-package com.ecoimpact_360.backend.exception;
+package com.ecoimpact_360.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
