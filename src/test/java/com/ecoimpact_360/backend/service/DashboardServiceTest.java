@@ -1,4 +1,4 @@
-package com.ecoimpact_360.backend.services;
+package com.ecoimpact_360.backend.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

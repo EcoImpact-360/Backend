@@ -1,4 +1,4 @@
-package com.ecoimpact_360.backend.services;
+package com.ecoimpact_360.backend.service;
 
 import java.util.LinkedHashMap;
 import java.util.List;

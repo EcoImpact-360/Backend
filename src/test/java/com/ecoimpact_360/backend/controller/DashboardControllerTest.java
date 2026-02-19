@@ -1,4 +1,4 @@
-package com.ecoimpact_360.backend.controllers;
+package com.ecoimpact_360.backend.controller;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
