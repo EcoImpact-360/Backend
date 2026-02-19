@@ -1,6 +1,6 @@
 -- Colegio
-INSERT INTO schools (name, city) 
-VALUES ('IES EcoImpact', 'Barcelona') 
+INSERT INTO schools (id, name, city) 
+VALUES (1, 'IES EcoImpact', 'Barcelona') 
 ON CONFLICT DO NOTHING;
 
 -- Aulas

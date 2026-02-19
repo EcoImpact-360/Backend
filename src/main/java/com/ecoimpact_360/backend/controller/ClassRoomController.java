@@ -1,6 +1,7 @@
 package com.ecoimpact_360.backend.controller;
 
 import com.ecoimpact_360.backend.model.Classroom;
+import com.ecoimpact_360.backend.dto.ClassroomCreateRequest;
 import com.ecoimpact_360.backend.service.ClassRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,5 +26,11 @@ public class ClassRoomController {
     @GetMapping("/ranking")
     public ResponseEntity<List<Classroom>> getRanking() {
         return ResponseEntity.ok(classroomService.getClassroomRankingByScore());
+    }
+
+    @PostMapping
+    public ResponseEntity<Classroom> create(@RequestBody ClassroomCreateRequest req) {
+        Classroom saved = classroomService.createClassroom(req);
+        return ResponseEntity.status(201).body(saved);
     }
 }
