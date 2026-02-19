@@ -1,4 +1,4 @@
-package com.ecoimpact_360.demo;
+package com.ecoimpact_360.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
