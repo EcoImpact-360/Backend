@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +60,26 @@ public class WasteEntryService {
                 .kmCarEquivalent(impactService.calculateKmCarEquivalent(co2))
                 .build();
     }
+        @Transactional(readOnly = true)
+    public List<WasteEntryResponseDTO> getAllEntries() {
+        return wasteEntryRepository.findAll().stream()
+                .map(entry -> {
+                   
+                    double water = impactService.calculateWaterSaved(entry.getWasteType(), entry.getQuantityKg());
+                    
+                    return WasteEntryResponseDTO.builder()
+                            .id(entry.getId())
+                            .wasteTypeName(entry.getWasteType().getName())
+                            .quantityKg(entry.getQuantityKg())
+                            .co2Kg(entry.getCo2Equivalent())
+                            .waterSaved(water)
+                            .treesEquivalent(impactService.calculateTreesEquivalent(entry.getCo2Equivalent()))
+                            .kmCarEquivalent(impactService.calculateKmCarEquivalent(entry.getCo2Equivalent()))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+    
     
 
 }
