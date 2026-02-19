@@ -1,4 +1,4 @@
-package com.ecoimpact_360.backend.services;
+package com.ecoimpact_360.backend.service;
 
 import org.springframework.stereotype.Service;
 
@@ -26,17 +26,29 @@ public class ImpactService {
     }
 
     public double calculateWaterSaved(WasteType wasteType, double kg) {
-    if (wasteType == null || wasteType.getName() == null) return 0.0;
+        if (wasteType == null || wasteType.getName() == null) return 0.0;
+        
+        String type = wasteType.getName().toUpperCase();
+        return switch (type) {
+            case "PLASTICO" -> kg * F_AGUA_PLASTICO;
+            case "PAPEL", "CARTON" -> kg * F_AGUA_PAPEL;
+            case "VIDRIO" -> kg * F_AGUA_VIDRIO;
+            case "ORGANICA" -> kg * F_AGUA_ORGANICA;
+            default -> 0.0;
+        };
+    }
     
-    String type = wasteType.getName().toUpperCase();
-    return switch (type) {
-        case "PLASTICO" -> kg * F_AGUA_PLASTICO;
-        case "PAPEL", "CARTON" -> kg * F_AGUA_PAPEL;
-        case "VIDRIO" -> kg * F_AGUA_VIDRIO;
-        case "ORGANICA" -> kg * F_AGUA_ORGANICA;
-        default -> 0.0;
-    };
-}
+    public double calculateWaterSaved(String type, double kg) {
+        if (type == null) return 0.0;
+        
+        return switch (type.toUpperCase()) {
+            case "PLASTIC" -> kg * F_AGUA_PLASTICO;
+            case "PAPEL", "PAPER", "CARTON" -> kg * F_AGUA_PAPEL;
+            case "VIDRIO", "GLASS" -> kg * F_AGUA_VIDRIO;
+            case "ORGANICA", "ORGANIC" -> kg * F_AGUA_ORGANICA;
+            default -> 0.0;
+        };
+    }
 
     public double calculateTreesEquivalent(double co2Kg) {
         return co2Kg / CO2_PER_TREE_YEAR;

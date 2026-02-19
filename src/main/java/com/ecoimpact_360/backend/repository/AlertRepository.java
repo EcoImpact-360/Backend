@@ -1,4 +1,4 @@
-package com.ecoimpact_360.backend.repositories;
+package com.ecoimpact_360.backend.repository;
 
 import java.util.List;
 
@@ -13,4 +13,6 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     List<Alert> findByResolvedFalse();
     List<Alert> findByAlertType(AlertType alertType);
     boolean existsByWasteTypeIdAndResolvedFalse(Long wasteTypeId);
+    
+    long countByResolvedFalse();
 }
