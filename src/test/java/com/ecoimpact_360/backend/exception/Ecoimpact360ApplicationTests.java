@@ -1,9 +1,10 @@
-package com.ecoimpact_360.demo;
+package com.ecoimpact_360.backend.exception;
 
-import com.ecoimpact_360.backend.Ecoimpact360Application;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
+import com.ecoimpact_360.backend.Ecoimpact360Application;
 
 @SpringBootTest(classes = Ecoimpact360Application.class)
 @ActiveProfiles("test")
