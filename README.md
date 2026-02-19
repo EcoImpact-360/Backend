@@ -9,6 +9,7 @@
 5. [Installation](#-installation)
 6. [Project Structure](#-project-structure)
 7. [API Endpoints](#-api-endpoints)
+8.[Test](#api-testing)
 
 ---
 
@@ -66,6 +67,7 @@ cd ecoimpact360-backend
    The system automatically populates initial waste types and conversion factors via `src/main/resources/data.sql`.
 
 3. **Build and Run:**
+
 ```bash
 mvn clean install
 mvn spring-boot:run
@@ -82,39 +84,8 @@ src/main/java/com/ecoimpact/
 └── exception/                 # Custom Exception Handlers
 
 
-Gemini dijo
-
-Here is the final part of the README formatted in Markdown, ready to be copied and pasted:
-Markdown
 
 ---
-
-## ⚙️ Installation
-
-1. **Configure Database:**
-   Edit `src/main/resources/application.properties` with your database credentials.
-
-2. **Initial Data:**
-   The system automatically populates initial waste types and conversion factors via `src/main/resources/data.sql`.
-
-3. **Build and Run:**
-```bash
-mvn clean install
-mvn spring-boot:run
-
-📂 Project Structure
-
-Following the structure visible in the source code:
-Plaintext
-
-src/main/java/com/ecoimpact/
-├── EcoImpactApplication.java  # Main Entry Point
-├── model/                     # JPA Entities (Layer 1)
-├── repository/                # JPA Repositories (Layer 2)
-├── service/                   # Business Logic (Layer 3A)
-├── controller/                # REST Controllers (Layer 3B)
-├── dto/                       # Request/Response Data Objects
-└── exception/                 # Custom Exception Handlers
 
 🚀 API Endpoints
 
@@ -127,49 +98,9 @@ Endpoint	Method	Description
 /api/v1/schools	GET/POST	Manage institutional data.
 
 
-Gemini dijo
-
-Here is the final part of the README formatted in Markdown, ready to be copied and pasted:
-Markdown
 
 ---
 
-## ⚙️ Installation
-
-1. **Configure Database:**
-   Edit `src/main/resources/application.properties` with your database credentials.
-
-2. **Initial Data:**
-   The system automatically populates initial waste types and conversion factors via `src/main/resources/data.sql`.
-
-3. **Build and Run:**
-```bash
-mvn clean install
-mvn spring-boot:run
-
-📂 Project Structure
-
-Following the structure visible in the source code:
-Plaintext
-
-src/main/java/com/ecoimpact/
-├── EcoImpactApplication.java  # Main Entry Point
-├── model/                     # JPA Entities (Layer 1)
-├── repository/                # JPA Repositories (Layer 2)
-├── service/                   # Business Logic (Layer 3A)
-├── controller/                # REST Controllers (Layer 3B)
-├── dto/                       # Request/Response Data Objects
-└── exception/                 # Custom Exception Handlers
-
-🚀 API Endpoints
-
-The backend provides a RESTful API with the following main resources:
-Endpoint	Method	Description
-/api/waste-entries	POST/GET	Manage waste logs and entries.
-/api/rankings	GET	Retrieve classroom performance rankings.
-/api/dashboards	GET	Fetch calculated metrics and equivalencies.
-/api/alerts	GET	Monitor system-generated alerts.
-/api/schools	GET/POST	Manage institutional data.
 🧪 Testing
 
 To run the automated test suite:
