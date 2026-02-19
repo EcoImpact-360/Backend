@@ -4,9 +4,9 @@ VALUES (1, 'IES EcoImpact', 'Barcelona')
 ON CONFLICT DO NOTHING;
 
 -- Aulas
-INSERT INTO classrooms (name, score, school_id) VALUES ('1ºA', 0, 1) ON CONFLICT DO NOTHING;
-INSERT INTO classrooms (name, score, school_id) VALUES ('2ºB', 0, 1) ON CONFLICT DO NOTHING;
-INSERT INTO classrooms (name, score, school_id) VALUES ('3ºC', 0, 1) ON CONFLICT DO NOTHING;
+INSERT INTO classrooms (name, score, school_id) VALUES ('1ºA', 4, 1) ON CONFLICT DO NOTHING;
+INSERT INTO classrooms (name, score, school_id) VALUES ('2ºB', 2, 1) ON CONFLICT DO NOTHING;
+INSERT INTO classrooms (name, score, school_id) VALUES ('3ºC', 1, 1) ON CONFLICT DO NOTHING;
 INSERT INTO classrooms (name, score, school_id) VALUES ('Comedor', 0, 1) ON CONFLICT DO NOTHING;
 
 -- Tipos de residuo
