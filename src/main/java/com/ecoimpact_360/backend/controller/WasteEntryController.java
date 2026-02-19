@@ -29,7 +29,7 @@ public class WasteEntryController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping // <--- Ahora ya no es un comentario
+    @GetMapping 
     public ResponseEntity<List<WasteEntryResponseDTO>> getAllEntries() {
         return ResponseEntity.ok(wasteEntryService.getAllEntries());
     }
