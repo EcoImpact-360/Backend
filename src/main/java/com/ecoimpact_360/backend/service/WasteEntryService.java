@@ -60,6 +60,8 @@ public class WasteEntryService {
                 .kmCarEquivalent(impactService.calculateKmCarEquivalent(co2))
                 .build();
     }
+
+    //añadi getAllEntries
         @Transactional(readOnly = true)
     public List<WasteEntryResponseDTO> getAllEntries() {
         return wasteEntryRepository.findAll().stream()
