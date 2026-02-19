@@ -1,4 +1,4 @@
-package com.ecoimpact_360.backend.repositories;
+package com.ecoimpact_360.backend.repository;
 
 import java.util.List;
 
