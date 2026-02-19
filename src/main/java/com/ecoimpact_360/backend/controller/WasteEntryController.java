@@ -4,6 +4,9 @@ import com.ecoimpact_360.backend.dto.WasteEntryRequestDTO;
 import com.ecoimpact_360.backend.dto.WasteEntryResponseDTO;
 import com.ecoimpact_360.backend.service.WasteEntryService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +27,8 @@ public class WasteEntryController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // @GetMapping
-    // public ResponseEntity<List<WasteEntryResponseDTO>> getAllEntries() {
-    //     return ResponseEntity.ok(wasteEntryService.getAllEntries());
-    // }
+    @GetMapping
+    public ResponseEntity<List<WasteEntryResponseDTO>> getAllEntries() {
+        return ResponseEntity.ok(wasteEntryService.getAllEntries());
+    }
 }
