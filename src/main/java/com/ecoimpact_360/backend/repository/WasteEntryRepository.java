@@ -1,4 +1,4 @@
-package com.ecoimpact_360.backend.repositories;
+package com.ecoimpact_360.backend.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
