@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ecoimpact_360.backend.dto.DashboardDTO;
-import com.ecoimpact_360.backend.services.DashboardService;
+import com.ecoimpact_360.backend.service.DashboardService;
 
 import lombok.RequiredArgsConstructor;
 

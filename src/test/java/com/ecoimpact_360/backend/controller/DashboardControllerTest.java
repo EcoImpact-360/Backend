@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ecoimpact_360.backend.dto.DashboardDTO;
-import com.ecoimpact_360.backend.services.DashboardService;
+import com.ecoimpact_360.backend.service.DashboardService;
 
 @SpringBootTest
 @AutoConfigureMockMvc

@@ -11,9 +11,9 @@ import com.ecoimpact_360.backend.dto.DashboardDTO;
 import com.ecoimpact_360.backend.dto.DashboardDTO.ClassroomRankingDTO;
 import com.ecoimpact_360.backend.model.Classroom;
 import com.ecoimpact_360.backend.model.enums.WasteCategory;
-import com.ecoimpact_360.backend.repositories.AlertRepository;
-import com.ecoimpact_360.backend.repositories.ClassroomRepository;
-import com.ecoimpact_360.backend.repositories.WasteEntryRepository;
+import com.ecoimpact_360.backend.repository.AlertRepository;
+import com.ecoimpact_360.backend.repository.ClassroomRepository;
+import com.ecoimpact_360.backend.repository.WasteEntryRepository;
 
 import lombok.RequiredArgsConstructor;
 
