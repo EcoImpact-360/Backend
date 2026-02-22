@@ -1,4 +1,0 @@
-DROP TABLE IF EXISTS waste_entries;
-DROP TABLE IF EXISTS classrooms;
-DROP TABLE IF EXISTS waste_types;
-DROP TABLE IF EXISTS schools;
