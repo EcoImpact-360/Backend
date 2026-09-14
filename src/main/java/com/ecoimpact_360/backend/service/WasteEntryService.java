@@ -24,7 +24,8 @@ public class WasteEntryService {
     private final WasteEntryRepository wasteEntryRepository;
     private final WasteTypeRepository wasteTypeRepository;
     private final ClassroomRepository classroomRepository;
-    private final ImpactService impactService; 
+    private final ImpactService impactService;
+    private final AlertService alertService;
 
     @Transactional
     public WasteEntryResponseDTO createWasteEntry(WasteEntryRequestDTO dto) {
@@ -50,7 +51,8 @@ public class WasteEntryService {
 
         WasteEntry savedEntry = wasteEntryRepository.save(entry);
 
-       
+        alertService.checkAndCreateAlert(savedEntry);
+
         return WasteEntryResponseDTO.builder()
                 .id(savedEntry.getId())
                 .wasteTypeName(type.getName())

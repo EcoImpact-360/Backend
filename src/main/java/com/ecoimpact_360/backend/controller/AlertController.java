@@ -1,8 +1,7 @@
 package com.ecoimpact_360.backend.controller;
 
-import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
-import com.ecoimpact_360.backend.model.Alert;
-import com.ecoimpact_360.backend.repository.AlertRepository;
+import com.ecoimpact_360.backend.dto.AlertResponseDTO;
+import com.ecoimpact_360.backend.service.AlertService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,29 +13,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AlertController {
 
-    private final AlertRepository alertRepository;
+    private final AlertService alertService;
 
-   
     @GetMapping("/pending")
-    public ResponseEntity<List<Alert>> getPendingAlerts() {
-        return ResponseEntity.ok(alertRepository.findByResolvedFalse());
+    public ResponseEntity<List<AlertResponseDTO>> getPendingAlerts() {
+        return ResponseEntity.ok(alertService.getPendingAlerts());
     }
 
-   
     @PatchMapping("/{id}/resolve")
     public ResponseEntity<Void> resolveAlert(@PathVariable Long id) {
-        Alert alert = alertRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Alert", "id", id));
-        
-        alert.setResolved(true);
-        alertRepository.save(alert);
-        
+        alertService.resolveAlert(id);
         return ResponseEntity.noContent().build();
     }
 
-   
     @GetMapping("/history")
-    public ResponseEntity<List<Alert>> getAllAlerts() {
-        return ResponseEntity.ok(alertRepository.findAll());
+    public ResponseEntity<List<AlertResponseDTO>> getAllAlerts() {
+        return ResponseEntity.ok(alertService.getAllAlerts());
     }
 }
