@@ -5,7 +5,6 @@ import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
 import com.ecoimpact_360.backend.model.Classroom;
 import com.ecoimpact_360.backend.model.WasteEntry;
 import com.ecoimpact_360.backend.model.WasteType;
-import com.ecoimpact_360.backend.repository.ClassroomRepository;
 import com.ecoimpact_360.backend.repository.WasteEntryRepository;
 import com.ecoimpact_360.backend.repository.WasteTypeRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +18,14 @@ import java.util.stream.Collectors;
 public class WasteEntryService {
     private final WasteEntryRepository wasteEntryRepository;
     private final WasteTypeRepository wasteTypeRepository;
-    private final ClassroomRepository classroomRepository;
+    private final ClassRoomService classRoomService;
     private final ImpactService impactService;
     private final AlertService alertService;
     @Transactional
-    public WasteEntryResponseDTO createWasteEntry(WasteEntryRequestDTO dto) {
+    public WasteEntryResponseDTO createWasteEntry(WasteEntryRequestDTO dto, Long schoolId) {
         WasteType type = wasteTypeRepository.findById(dto.getWasteTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException("WasteType", "id", dto.getWasteTypeId()));
-        Classroom classroom = classroomRepository.findById(dto.getClassroomId())
-                .orElseThrow(() -> new ResourceNotFoundException("Classroom", "id", dto.getClassroomId()));
+        Classroom classroom = classRoomService.getOwnedClassroomOrThrow(dto.getClassroomId(), schoolId);
         double co2 = impactService.calculateCo2(type, dto.getQuantityKg());
         double water = impactService.calculateWaterSaved(type, dto.getQuantityKg());
         WasteEntry entry = new WasteEntry();
@@ -49,8 +47,8 @@ public class WasteEntryService {
                 .build();
     }
     @Transactional(readOnly = true)
-    public List<WasteEntryResponseDTO> getAllEntries() {
-        return wasteEntryRepository.findAll().stream()
+    public List<WasteEntryResponseDTO> getEntriesForSchool(Long schoolId) {
+        return wasteEntryRepository.findByClassroomSchoolId(schoolId).stream()
                 .map(entry -> {
                     double water = impactService.calculateWaterSaved(entry.getWasteType(), entry.getQuantityKg());
                     return WasteEntryResponseDTO.builder()

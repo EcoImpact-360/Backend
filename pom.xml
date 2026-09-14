@@ -38,6 +38,13 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
+		<!-- Hash de contraseñas (BCrypt). Deliberadamente NO spring-boot-starter-security:
+		     no queremos su cadena de filtros/CORS/CSRF por defecto, solo el encoder. -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+		</dependency>
+
 		<!-- Validaciones @NotNull @Positive etc -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

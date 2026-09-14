@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.ecoimpact_360.backend.dto.DashboardDTO;
+import com.ecoimpact_360.backend.security.TokenService;
 import com.ecoimpact_360.backend.service.DashboardService;
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -21,13 +23,18 @@ import com.ecoimpact_360.backend.service.DashboardService;
 class DashboardControllerTest {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private TokenService tokenService;
     @MockBean
     private DashboardService dashboardService;
+    private String bearer() {
+        return "Bearer " + tokenService.generateToken(1L);
+    }
     @Test
     void getGlobalDashboard_Returns200() throws Exception {
         DashboardDTO dashboard = createMockDashboard();
-        when(dashboardService.getGlobalStats()).thenReturn(dashboard);
-        mockMvc.perform(get("/api/v1/dashboard/global"))
+        when(dashboardService.getGlobalStats(1L)).thenReturn(dashboard);
+        mockMvc.perform(get("/api/v1/dashboard/global").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(100.0))
                 .andExpect(jsonPath("$.totalCo2Equivalente").value(150.0))
@@ -38,6 +45,11 @@ class DashboardControllerTest {
                 .andExpect(jsonPath("$.rankingAulas").isArray())
                 .andExpect(jsonPath("$.rankingAulas").isNotEmpty())
                 .andExpect(jsonPath("$.residuosPorCategoria").isMap());
+    }
+    @Test
+    void getGlobalDashboard_Returns401_WhenNoToken() throws Exception {
+        mockMvc.perform(get("/api/v1/dashboard/global"))
+                .andExpect(status().isUnauthorized());
     }
     @Test
     void getGlobalDashboard_ReturnsEmptyMetrics_WhenNoData() throws Exception {
@@ -51,8 +63,8 @@ class DashboardControllerTest {
                 .rankingAulas(Collections.emptyList())
                 .residuosPorCategoria(new HashMap<>())
                 .build();
-        when(dashboardService.getGlobalStats()).thenReturn(emptyDashboard);
-        mockMvc.perform(get("/api/v1/dashboard/global"))
+        when(dashboardService.getGlobalStats(1L)).thenReturn(emptyDashboard);
+        mockMvc.perform(get("/api/v1/dashboard/global").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(0.0))
                 .andExpect(jsonPath("$.totalAlertasActivas").value(0))
@@ -61,8 +73,8 @@ class DashboardControllerTest {
     @Test
     void getClassroomDashboard_Returns200() throws Exception {
         DashboardDTO dashboard = createMockDashboard();
-        when(dashboardService.getClassroomStats(1L)).thenReturn(dashboard);
-        mockMvc.perform(get("/api/v1/dashboard/classroom/1"))
+        when(dashboardService.getClassroomStats(1L, 1L)).thenReturn(dashboard);
+        mockMvc.perform(get("/api/v1/dashboard/classroom/1").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(100.0))
                 .andExpect(jsonPath("$.totalCo2Equivalente").value(150.0))
@@ -71,8 +83,8 @@ class DashboardControllerTest {
     @Test
     void getClassroomDashboard_WithInvalidId_ReturnsData() throws Exception {
         DashboardDTO dashboard = createMockDashboard();
-        when(dashboardService.getClassroomStats(999L)).thenReturn(dashboard);
-        mockMvc.perform(get("/api/v1/dashboard/classroom/999"))
+        when(dashboardService.getClassroomStats(999L, 1L)).thenReturn(dashboard);
+        mockMvc.perform(get("/api/v1/dashboard/classroom/999").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(100.0));
     }
@@ -91,8 +103,8 @@ class DashboardControllerTest {
                 ))
                 .residuosPorCategoria(new HashMap<>())
                 .build();
-        when(dashboardService.getGlobalStats()).thenReturn(dashboard);
-        mockMvc.perform(get("/api/v1/dashboard/global"))
+        when(dashboardService.getGlobalStats(1L)).thenReturn(dashboard);
+        mockMvc.perform(get("/api/v1/dashboard/global").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rankingAulas[0].id").value(1))
                 .andExpect(jsonPath("$.rankingAulas[0].name").value("Aula 1A"))
@@ -113,8 +125,8 @@ class DashboardControllerTest {
                 .rankingAulas(Collections.emptyList())
                 .residuosPorCategoria(createResiduosPorCategoria())
                 .build();
-        when(dashboardService.getGlobalStats()).thenReturn(dashboard);
-        mockMvc.perform(get("/api/v1/dashboard/global"))
+        when(dashboardService.getGlobalStats(1L)).thenReturn(dashboard);
+        mockMvc.perform(get("/api/v1/dashboard/global").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.residuosPorCategoria.PLASTIC").value(50.0))
                 .andExpect(jsonPath("$.residuosPorCategoria.PAPEL").value(30.0))
@@ -123,8 +135,8 @@ class DashboardControllerTest {
     @Test
     void getClassroomDashboard_WithZeroId_Returns200() throws Exception {
         DashboardDTO dashboard = createMockDashboard();
-        when(dashboardService.getClassroomStats(0L)).thenReturn(dashboard);
-        mockMvc.perform(get("/api/v1/dashboard/classroom/0"))
+        when(dashboardService.getClassroomStats(0L, 1L)).thenReturn(dashboard);
+        mockMvc.perform(get("/api/v1/dashboard/classroom/0").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk());
     }
     private DashboardDTO createMockDashboard() {

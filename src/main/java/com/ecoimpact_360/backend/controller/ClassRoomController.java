@@ -2,6 +2,7 @@ package com.ecoimpact_360.backend.controller;
 import com.ecoimpact_360.backend.dto.ClassroomCreateRequest;
 import com.ecoimpact_360.backend.dto.ClassroomResponseDTO;
 import com.ecoimpact_360.backend.model.Classroom;
+import com.ecoimpact_360.backend.security.AuthInterceptor;
 import com.ecoimpact_360.backend.service.ClassRoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,16 +16,17 @@ import java.util.stream.Collectors;
 public class ClassRoomController {
     private final ClassRoomService classroomService;
     @GetMapping
-    public ResponseEntity<List<ClassroomResponseDTO>> getAll() {
-        return ResponseEntity.ok(toDtoList(classroomService.getAllClassrooms()));
+    public ResponseEntity<List<ClassroomResponseDTO>> getAll(@RequestAttribute(AuthInterceptor.SCHOOL_ID_ATTRIBUTE) Long schoolId) {
+        return ResponseEntity.ok(toDtoList(classroomService.getClassroomsForSchool(schoolId)));
     }
     @GetMapping("/ranking")
-    public ResponseEntity<List<ClassroomResponseDTO>> getRanking() {
-        return ResponseEntity.ok(toDtoList(classroomService.getClassroomRankingByScore()));
+    public ResponseEntity<List<ClassroomResponseDTO>> getRanking(@RequestAttribute(AuthInterceptor.SCHOOL_ID_ATTRIBUTE) Long schoolId) {
+        return ResponseEntity.ok(toDtoList(classroomService.getClassroomRankingByScoreForSchool(schoolId)));
     }
     @PostMapping
-    public ResponseEntity<ClassroomResponseDTO> create(@Valid @RequestBody ClassroomCreateRequest req) {
-        Classroom saved = classroomService.createClassroom(req);
+    public ResponseEntity<ClassroomResponseDTO> create(@Valid @RequestBody ClassroomCreateRequest req,
+                                                         @RequestAttribute(AuthInterceptor.SCHOOL_ID_ATTRIBUTE) Long schoolId) {
+        Classroom saved = classroomService.createClassroom(req, schoolId);
         return ResponseEntity.status(201).body(toDto(saved));
     }
     private List<ClassroomResponseDTO> toDtoList(List<Classroom> classrooms) {

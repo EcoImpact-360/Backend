@@ -1,7 +1,9 @@
 package com.ecoimpact_360.backend.controller;
+import com.ecoimpact_360.backend.dto.SchoolCreateRequest;
 import com.ecoimpact_360.backend.dto.SchoolResponseDTO;
 import com.ecoimpact_360.backend.model.School;
 import com.ecoimpact_360.backend.repository.SchoolRepository;
+import com.ecoimpact_360.backend.service.SchoolService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SchoolController {
     private final SchoolRepository schoolRepository;
+    private final SchoolService schoolService;
     @GetMapping
     public ResponseEntity<List<SchoolResponseDTO>> getAllSchools() {
         return ResponseEntity.ok(schoolRepository.findAll().stream().map(this::toDto).collect(Collectors.toList()));
@@ -24,8 +27,8 @@ public class SchoolController {
                 .orElse(ResponseEntity.notFound().build());
     }
     @PostMapping
-    public ResponseEntity<SchoolResponseDTO> createSchool(@Valid @RequestBody School school) {
-        School savedSchool = schoolRepository.save(school);
+    public ResponseEntity<SchoolResponseDTO> createSchool(@Valid @RequestBody SchoolCreateRequest request) {
+        School savedSchool = schoolService.registerSchool(request);
         return ResponseEntity.ok(toDto(savedSchool));
     }
     private SchoolResponseDTO toDto(School school) {

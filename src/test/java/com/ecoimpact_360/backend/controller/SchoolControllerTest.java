@@ -12,8 +12,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import com.ecoimpact_360.backend.exception.ConflictException;
 import com.ecoimpact_360.backend.model.School;
 import com.ecoimpact_360.backend.repository.SchoolRepository;
+import com.ecoimpact_360.backend.service.SchoolService;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -22,6 +24,8 @@ class SchoolControllerTest {
     private MockMvc mockMvc;
     @MockBean
     private SchoolRepository schoolRepository;
+    @MockBean
+    private SchoolService schoolService;
     @Test
     void getAllSchools_Returns200WithList() throws Exception {
         School school = new School();
@@ -53,20 +57,47 @@ class SchoolControllerTest {
         School saved = new School();
         saved.setId(1L);
         saved.setName("Colegio Central");
-        when(schoolRepository.save(any())).thenReturn(saved);
+        when(schoolService.registerSchool(any())).thenReturn(saved);
         mockMvc.perform(post("/api/v1/schools")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Colegio Central\",\"city\":\"Madrid\"}"))
+                        .content("{\"name\":\"Colegio Central\",\"city\":\"Madrid\",\"password\":\"secreta123\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Colegio Central"));
+                .andExpect(jsonPath("$.name").value("Colegio Central"))
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
     @Test
     void createSchool_Returns400_WhenNameIsBlank() throws Exception {
         mockMvc.perform(post("/api/v1/schools")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"city\":\"Madrid\"}"))
+                        .content("{\"name\":\"\",\"city\":\"Madrid\",\"password\":\"secreta123\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
-        verify(schoolRepository, never()).save(any());
+        verify(schoolService, never()).registerSchool(any());
+    }
+    @Test
+    void createSchool_Returns400_WhenPasswordIsMissing() throws Exception {
+        mockMvc.perform(post("/api/v1/schools")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Colegio Central\",\"city\":\"Madrid\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+        verify(schoolService, never()).registerSchool(any());
+    }
+    @Test
+    void createSchool_Returns400_WhenPasswordTooShort() throws Exception {
+        mockMvc.perform(post("/api/v1/schools")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Colegio Central\",\"password\":\"123\"}"))
+                .andExpect(status().isBadRequest());
+        verify(schoolService, never()).registerSchool(any());
+    }
+    @Test
+    void createSchool_Returns409_WhenNameAlreadyTaken() throws Exception {
+        when(schoolService.registerSchool(any())).thenThrow(new ConflictException("Ya existe un colegio registrado con ese nombre"));
+        mockMvc.perform(post("/api/v1/schools")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Colegio Central\",\"password\":\"secreta123\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errorCode").value("CONFLICT"));
     }
 }

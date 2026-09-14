@@ -10,4 +10,7 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     List<Alert> findByAlertType(AlertType alertType);
     boolean existsByWasteTypeIdAndResolvedFalse(Long wasteTypeId);
     long countByResolvedFalse();
+    List<Alert> findByResolvedFalseAndClassroomSchoolId(Long schoolId);
+    List<Alert> findByClassroomSchoolId(Long schoolId);
+    long countByResolvedFalseAndClassroomSchoolId(Long schoolId);
 }

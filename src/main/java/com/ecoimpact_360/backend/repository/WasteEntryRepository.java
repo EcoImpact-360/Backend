@@ -11,6 +11,7 @@ import com.ecoimpact_360.backend.model.enums.WasteStatus;
 @Repository
 public interface WasteEntryRepository extends JpaRepository<WasteEntry, Long> {
     List<WasteEntry> findByClassroomId(Long classroomId);
+    List<WasteEntry> findByClassroomSchoolId(Long schoolId);
     List<WasteEntry> findByStatus(WasteStatus status);
     List<WasteEntry> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
     @Query("SELECT SUM(e.quantityKg) FROM WasteEntry e " +
@@ -42,4 +43,14 @@ public interface WasteEntryRepository extends JpaRepository<WasteEntry, Long> {
            "WHERE e.classroom.id = :classroomId AND e.wasteType.category = :category")
     Double sumKgByClassroomAndCategory(@Param("classroomId") Long classroomId,
                                         @Param("category") WasteCategory category);
+    @Query("SELECT SUM(e.quantityKg) FROM WasteEntry e " +
+           "WHERE e.classroom.school.id = :schoolId")
+    Double sumKgBySchool(@Param("schoolId") Long schoolId);
+    @Query("SELECT SUM(e.co2Equivalent) FROM WasteEntry e " +
+           "WHERE e.classroom.school.id = :schoolId")
+    Double sumCo2BySchool(@Param("schoolId") Long schoolId);
+    @Query("SELECT SUM(e.quantityKg) FROM WasteEntry e " +
+           "WHERE e.classroom.school.id = :schoolId AND e.wasteType.category = :category")
+    Double sumKgBySchoolAndCategory(@Param("schoolId") Long schoolId,
+                                     @Param("category") WasteCategory category);
 }

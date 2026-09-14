@@ -1,5 +1,6 @@
 package com.ecoimpact_360.backend.service;
 import com.ecoimpact_360.backend.dto.AlertResponseDTO;
+import com.ecoimpact_360.backend.exception.ForbiddenException;
 import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
 import com.ecoimpact_360.backend.model.Alert;
 import com.ecoimpact_360.backend.model.WasteEntry;
@@ -34,21 +35,25 @@ public class AlertService {
         }
     }
     @Transactional(readOnly = true)
-    public List<AlertResponseDTO> getPendingAlerts() {
-        return alertRepository.findByResolvedFalse().stream()
+    public List<AlertResponseDTO> getPendingAlertsForSchool(Long schoolId) {
+        return alertRepository.findByResolvedFalseAndClassroomSchoolId(schoolId).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
     @Transactional(readOnly = true)
-    public List<AlertResponseDTO> getAllAlerts() {
-        return alertRepository.findAll().stream()
+    public List<AlertResponseDTO> getAllAlertsForSchool(Long schoolId) {
+        return alertRepository.findByClassroomSchoolId(schoolId).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
     @Transactional
-    public void resolveAlert(Long id) {
+    public void resolveAlert(Long id, Long schoolId) {
         Alert alert = alertRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Alert", "id", id));
+        if (alert.getClassroom() == null || alert.getClassroom().getSchool() == null
+                || !alert.getClassroom().getSchool().getId().equals(schoolId)) {
+            throw new ForbiddenException("Esta alerta no pertenece a tu colegio");
+        }
         alert.setResolved(true);
         alertRepository.save(alert);
     }

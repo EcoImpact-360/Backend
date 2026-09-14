@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.ecoimpact_360.backend.dto.RankingDTO;
+import com.ecoimpact_360.backend.security.TokenService;
 import com.ecoimpact_360.backend.service.RankingService;
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -18,8 +20,13 @@ import com.ecoimpact_360.backend.service.RankingService;
 class RankingControllerTest {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private TokenService tokenService;
     @MockBean
     private RankingService rankingService;
+    private String bearer() {
+        return "Bearer " + tokenService.generateToken(1L);
+    }
     @Test
     void getRanking_Returns200WithList() throws Exception {
         RankingDTO ranking = RankingDTO.builder()
@@ -28,18 +35,23 @@ class RankingControllerTest {
                 .totalWaterSaved(30.0)
                 .totalEntries(4L)
                 .build();
-        when(rankingService.getClassroomRanking()).thenReturn(List.of(ranking));
-        mockMvc.perform(get("/api/v1/ranking"))
+        when(rankingService.getClassroomRankingForSchool(1L)).thenReturn(List.of(ranking));
+        mockMvc.perform(get("/api/v1/ranking").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].classroomName").value("Aula 1A"))
                 .andExpect(jsonPath("$[0].totalCo2").value(15.0));
     }
     @Test
     void getRanking_Returns200WithEmptyList_WhenNoData() throws Exception {
-        when(rankingService.getClassroomRanking()).thenReturn(List.of());
-        mockMvc.perform(get("/api/v1/ranking"))
+        when(rankingService.getClassroomRankingForSchool(1L)).thenReturn(List.of());
+        mockMvc.perform(get("/api/v1/ranking").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
+    }
+    @Test
+    void getRanking_Returns401_WhenNoToken() throws Exception {
+        mockMvc.perform(get("/api/v1/ranking"))
+                .andExpect(status().isUnauthorized());
     }
 }

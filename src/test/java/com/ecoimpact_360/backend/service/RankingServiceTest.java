@@ -36,18 +36,18 @@ class RankingServiceTest {
     }
     @Test
     void getClassroomRanking_ReturnsEmptyList_WhenNoEntries() {
-        when(wasteEntryRepository.findAll()).thenReturn(Collections.emptyList());
-        List<RankingDTO> result = rankingService.getClassroomRanking();
+        when(wasteEntryRepository.findByClassroomSchoolId(1L)).thenReturn(Collections.emptyList());
+        List<RankingDTO> result = rankingService.getClassroomRankingForSchool(1L);
         assertTrue(result.isEmpty());
     }
     @Test
     void getClassroomRanking_SortsByTotalCo2Descending() {
-        when(wasteEntryRepository.findAll()).thenReturn(Arrays.asList(
+        when(wasteEntryRepository.findByClassroomSchoolId(1L)).thenReturn(Arrays.asList(
                 entryFor("Aula 1A", 5.0, 2.0),
                 entryFor("Aula 2B", 15.0, 6.0)
         ));
         when(impactService.calculateWaterSaved(any(WasteType.class), anyDouble())).thenReturn(0.0);
-        List<RankingDTO> result = rankingService.getClassroomRanking();
+        List<RankingDTO> result = rankingService.getClassroomRankingForSchool(1L);
         assertEquals(2, result.size());
         assertEquals("Aula 2B", result.get(0).getClassroomName());
         assertEquals(15.0, result.get(0).getTotalCo2());
@@ -55,13 +55,13 @@ class RankingServiceTest {
     }
     @Test
     void getClassroomRanking_AggregatesMultipleEntriesPerClassroom() {
-        when(wasteEntryRepository.findAll()).thenReturn(Arrays.asList(
+        when(wasteEntryRepository.findByClassroomSchoolId(1L)).thenReturn(Arrays.asList(
                 entryFor("Aula 1A", 5.0, 2.0),
                 entryFor("Aula 1A", 3.0, 1.0)
         ));
         when(impactService.calculateWaterSaved(any(WasteType.class), eq(2.0))).thenReturn(4.0);
         when(impactService.calculateWaterSaved(any(WasteType.class), eq(1.0))).thenReturn(2.0);
-        List<RankingDTO> result = rankingService.getClassroomRanking();
+        List<RankingDTO> result = rankingService.getClassroomRankingForSchool(1L);
         assertEquals(1, result.size());
         RankingDTO dto = result.get(0);
         assertEquals(8.0, dto.getTotalCo2());

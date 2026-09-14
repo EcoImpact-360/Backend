@@ -136,6 +136,48 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiErrorDTO> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
+        logger.warn("Error: {}, ErrorCode: {}, Message: {}", ex.getClass().getSimpleName(), ErrorCode.UNAUTHORIZED.getCode(), ex.getMessage());
+        ApiErrorDTO error = new ApiErrorDTO(
+                Instant.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized",
+                ex.getMessage(),
+                request.getRequestURI(),
+                ErrorCode.UNAUTHORIZED.getCode(),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiErrorDTO> handleForbidden(ForbiddenException ex, HttpServletRequest request) {
+        logger.warn("Error: {}, ErrorCode: {}, Message: {}", ex.getClass().getSimpleName(), ErrorCode.FORBIDDEN.getCode(), ex.getMessage());
+        ApiErrorDTO error = new ApiErrorDTO(
+                Instant.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                ex.getMessage(),
+                request.getRequestURI(),
+                ErrorCode.FORBIDDEN.getCode(),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiErrorDTO> handleConflict(ConflictException ex, HttpServletRequest request) {
+        logger.warn("Error: {}, ErrorCode: {}, Message: {}", ex.getClass().getSimpleName(), ErrorCode.CONFLICT.getCode(), ex.getMessage());
+        ApiErrorDTO error = new ApiErrorDTO(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                request.getRequestURI(),
+                ErrorCode.CONFLICT.getCode(),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorDTO> handleGenericException(Exception ex, HttpServletRequest request) {
         logger.error("Error: {}, ErrorCode: {}, Message: {}, Details: {ExceptionType: {}, StackTrace: {}}",

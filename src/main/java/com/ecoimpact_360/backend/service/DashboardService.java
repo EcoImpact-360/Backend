@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import com.ecoimpact_360.backend.dto.DashboardDTO;
 import com.ecoimpact_360.backend.dto.DashboardDTO.ClassroomRankingDTO;
-import com.ecoimpact_360.backend.model.Classroom;
 import com.ecoimpact_360.backend.model.enums.WasteCategory;
 import com.ecoimpact_360.backend.repository.AlertRepository;
 import com.ecoimpact_360.backend.repository.ClassroomRepository;
@@ -18,16 +17,17 @@ public class DashboardService {
     private final WasteEntryRepository wasteEntryRepository;
     private final AlertRepository alertRepository;
     private final ClassroomRepository classroomRepository;
+    private final ClassRoomService classRoomService;
     private final ImpactService impactService;
-    public DashboardDTO getGlobalStats() {
-        Double totalKg = wasteEntryRepository.sumAllKg() != null ? wasteEntryRepository.sumAllKg() : 0.0;
-        Double totalCo2 = wasteEntryRepository.sumAllCo2() != null ? wasteEntryRepository.sumAllCo2() : 0.0;
-        Double aguaAhorrada = calculateAguaAhorradaGlobal();
+    public DashboardDTO getGlobalStats(Long schoolId) {
+        Double totalKg = wasteEntryRepository.sumKgBySchool(schoolId) != null ? wasteEntryRepository.sumKgBySchool(schoolId) : 0.0;
+        Double totalCo2 = wasteEntryRepository.sumCo2BySchool(schoolId) != null ? wasteEntryRepository.sumCo2BySchool(schoolId) : 0.0;
+        Double aguaAhorrada = calculateAguaAhorradaSchool(schoolId);
         Double arbresEquivalentes = impactService.calculateTreesEquivalent(totalCo2);
         Double kmCarroEquivalente = impactService.calculateKmCarEquivalent(totalCo2);
-        long alertasActivas = alertRepository.countByResolvedFalse();
-        List<ClassroomRankingDTO> ranking = getRankingAulas();
-        Map<String, Double> residuosPorCategoria = getResiduosPorCategoriaGlobal();
+        long alertasActivas = alertRepository.countByResolvedFalseAndClassroomSchoolId(schoolId);
+        List<ClassroomRankingDTO> ranking = getRankingAulasForSchool(schoolId);
+        Map<String, Double> residuosPorCategoria = getResiduosPorCategoriaSchool(schoolId);
         return DashboardDTO.builder()
                 .totalKgRecolectados(totalKg)
                 .totalCo2Equivalente(totalCo2)
@@ -39,16 +39,16 @@ public class DashboardService {
                 .residuosPorCategoria(residuosPorCategoria)
                 .build();
     }
-    public DashboardDTO getClassroomStats(Long classroomId) {
-        Double totalKg = wasteEntryRepository.sumKgByClassroom(classroomId) != null 
+    public DashboardDTO getClassroomStats(Long classroomId, Long schoolId) {
+        classRoomService.getOwnedClassroomOrThrow(classroomId, schoolId);
+        Double totalKg = wasteEntryRepository.sumKgByClassroom(classroomId) != null
                 ? wasteEntryRepository.sumKgByClassroom(classroomId) : 0.0;
-        Double totalCo2 = wasteEntryRepository.sumCo2ByClassroom(classroomId) != null 
+        Double totalCo2 = wasteEntryRepository.sumCo2ByClassroom(classroomId) != null
                 ? wasteEntryRepository.sumCo2ByClassroom(classroomId) : 0.0;
         Double aguaAhorrada = calculateAguaAhorradaClassroom(classroomId);
         Double arbresEquivalentes = impactService.calculateTreesEquivalent(totalCo2);
         Double kmCarroEquivalente = impactService.calculateKmCarEquivalent(totalCo2);
-        Classroom classroom = classroomRepository.findById(classroomId).orElse(null);
-        List<ClassroomRankingDTO> ranking = getRankingAulas();
+        List<ClassroomRankingDTO> ranking = getRankingAulasForSchool(schoolId);
         Map<String, Double> residuosPorCategoria = getResiduosPorCategoriaClassroom(classroomId);
         return DashboardDTO.builder()
                 .totalKgRecolectados(totalKg)
@@ -61,8 +61,8 @@ public class DashboardService {
                 .residuosPorCategoria(residuosPorCategoria)
                 .build();
     }
-    private List<ClassroomRankingDTO> getRankingAulas() {
-        return classroomRepository.findAllByOrderByScoreDesc().stream()
+    private List<ClassroomRankingDTO> getRankingAulasForSchool(Long schoolId) {
+        return classroomRepository.findBySchoolIdOrderByScoreDesc(schoolId).stream()
                 .map(c -> ClassroomRankingDTO.builder()
                         .id(c.getId())
                         .name(c.getName())
@@ -70,10 +70,10 @@ public class DashboardService {
                         .build())
                 .collect(Collectors.toList());
     }
-    private Map<String, Double> getResiduosPorCategoriaGlobal() {
+    private Map<String, Double> getResiduosPorCategoriaSchool(Long schoolId) {
         Map<String, Double> result = new LinkedHashMap<>();
         for (WasteCategory category : WasteCategory.values()) {
-            Double kg = wasteEntryRepository.sumKgByCategory(category);
+            Double kg = wasteEntryRepository.sumKgBySchoolAndCategory(schoolId, category);
             result.put(category.name(), kg != null ? kg : 0.0);
         }
         return result;
@@ -86,10 +86,10 @@ public class DashboardService {
         }
         return result;
     }
-    private Double calculateAguaAhorradaGlobal() {
+    private Double calculateAguaAhorradaSchool(Long schoolId) {
         Double total = 0.0;
         for (WasteCategory category : WasteCategory.values()) {
-            Double kg = wasteEntryRepository.sumKgByCategory(category);
+            Double kg = wasteEntryRepository.sumKgBySchoolAndCategory(schoolId, category);
             if (kg != null && kg > 0) {
                 total += impactService.calculateWaterSaved(category.name(), kg);
             }

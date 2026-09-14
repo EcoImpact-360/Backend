@@ -12,11 +12,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.ecoimpact_360.backend.dto.WasteEntryRequestDTO;
 import com.ecoimpact_360.backend.dto.WasteEntryResponseDTO;
+import com.ecoimpact_360.backend.exception.ForbiddenException;
 import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
 import com.ecoimpact_360.backend.model.Classroom;
 import com.ecoimpact_360.backend.model.WasteEntry;
 import com.ecoimpact_360.backend.model.WasteType;
-import com.ecoimpact_360.backend.repository.ClassroomRepository;
 import com.ecoimpact_360.backend.repository.WasteEntryRepository;
 import com.ecoimpact_360.backend.repository.WasteTypeRepository;
 @ExtendWith(MockitoExtension.class)
@@ -26,7 +26,7 @@ class WasteEntryServiceTest {
     @Mock
     private WasteTypeRepository wasteTypeRepository;
     @Mock
-    private ClassroomRepository classroomRepository;
+    private ClassRoomService classRoomService;
     @Mock
     private ImpactService impactService;
     @Mock
@@ -49,7 +49,7 @@ class WasteEntryServiceTest {
     @Test
     void createWasteEntry_SavesEntryAndReturnsCalculatedImpact() {
         when(wasteTypeRepository.findById(1L)).thenReturn(Optional.of(wasteType));
-        when(classroomRepository.findById(2L)).thenReturn(Optional.of(classroom));
+        when(classRoomService.getOwnedClassroomOrThrow(2L, 9L)).thenReturn(classroom);
         when(impactService.calculateCo2(wasteType, 5.0)).thenReturn(10.0);
         when(impactService.calculateWaterSaved(wasteType, 5.0)).thenReturn(50.0);
         when(impactService.calculateTreesEquivalent(10.0)).thenReturn(0.5);
@@ -59,7 +59,7 @@ class WasteEntryServiceTest {
             entry.setId(99L);
             return entry;
         });
-        WasteEntryResponseDTO response = wasteEntryService.createWasteEntry(request);
+        WasteEntryResponseDTO response = wasteEntryService.createWasteEntry(request, 9L);
         assertEquals(99L, response.getId());
         assertEquals("Plastico", response.getWasteTypeName());
         assertEquals(5.0, response.getQuantityKg());
@@ -70,29 +70,29 @@ class WasteEntryServiceTest {
     @Test
     void createWasteEntry_ThrowsResourceNotFound_WhenWasteTypeMissing() {
         when(wasteTypeRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> wasteEntryService.createWasteEntry(request));
+        assertThrows(ResourceNotFoundException.class, () -> wasteEntryService.createWasteEntry(request, 9L));
         verify(wasteEntryRepository, never()).save(any());
         verify(alertService, never()).checkAndCreateAlert(any());
     }
     @Test
-    void createWasteEntry_ThrowsResourceNotFound_WhenClassroomMissing() {
+    void createWasteEntry_ThrowsForbidden_WhenClassroomBelongsToAnotherSchool() {
         when(wasteTypeRepository.findById(1L)).thenReturn(Optional.of(wasteType));
-        when(classroomRepository.findById(2L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> wasteEntryService.createWasteEntry(request));
+        when(classRoomService.getOwnedClassroomOrThrow(2L, 9L)).thenThrow(new ForbiddenException("Esta aula no pertenece a tu colegio"));
+        assertThrows(ForbiddenException.class, () -> wasteEntryService.createWasteEntry(request, 9L));
         verify(wasteEntryRepository, never()).save(any());
     }
     @Test
-    void getAllEntries_MapsRepositoryResultsToDto() {
+    void getEntriesForSchool_MapsRepositoryResultsToDto() {
         WasteEntry entry = new WasteEntry();
         entry.setId(1L);
         entry.setWasteType(wasteType);
         entry.setQuantityKg(3.0);
         entry.setCo2Equivalent(6.0);
-        when(wasteEntryRepository.findAll()).thenReturn(List.of(entry));
+        when(wasteEntryRepository.findByClassroomSchoolId(9L)).thenReturn(List.of(entry));
         when(impactService.calculateWaterSaved(wasteType, 3.0)).thenReturn(30.0);
         when(impactService.calculateTreesEquivalent(6.0)).thenReturn(0.3);
         when(impactService.calculateKmCarEquivalent(6.0)).thenReturn(50.0);
-        List<WasteEntryResponseDTO> result = wasteEntryService.getAllEntries();
+        List<WasteEntryResponseDTO> result = wasteEntryService.getEntriesForSchool(9L);
         assertEquals(1, result.size());
         assertEquals("Plastico", result.get(0).getWasteTypeName());
         assertEquals(30.0, result.get(0).getWaterSaved());

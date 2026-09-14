@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 public class RankingService {
     private final WasteEntryRepository wasteEntryRepository;
     private final ImpactService impactService;
-    public List<RankingDTO> getClassroomRanking() {
-        Map<String, List<WasteEntry>> byClassroom = wasteEntryRepository.findAll().stream()
+    public List<RankingDTO> getClassroomRankingForSchool(Long schoolId) {
+        Map<String, List<WasteEntry>> byClassroom = wasteEntryRepository.findByClassroomSchoolId(schoolId).stream()
                 .collect(Collectors.groupingBy(e -> e.getClassroom().getName()));
         return byClassroom.entrySet().stream()
                 .map(entry -> {

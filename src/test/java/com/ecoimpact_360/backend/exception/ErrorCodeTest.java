@@ -41,7 +41,25 @@ class ErrorCodeTest {
     @Test
     void testAllErrorCodesExist() {
         ErrorCode[] codes = ErrorCode.values();
-        assertEquals(6, codes.length);
+        assertEquals(9, codes.length);
+    }
+    @Test
+    void testConflictCode() {
+        ErrorCode code = ErrorCode.CONFLICT;
+        assertEquals("CONFLICT", code.getCode());
+        assertEquals("El recurso ya existe", code.getDescription());
+    }
+    @Test
+    void testUnauthorizedCode() {
+        ErrorCode code = ErrorCode.UNAUTHORIZED;
+        assertEquals("UNAUTHORIZED", code.getCode());
+        assertEquals("No autenticado", code.getDescription());
+    }
+    @Test
+    void testForbiddenCode() {
+        ErrorCode code = ErrorCode.FORBIDDEN;
+        assertEquals("FORBIDDEN", code.getCode());
+        assertEquals("Acceso no permitido", code.getDescription());
     }
     @Test
     void testErrorCodesAreNotNull() {

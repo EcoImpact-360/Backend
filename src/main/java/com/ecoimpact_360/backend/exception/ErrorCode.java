@@ -5,7 +5,10 @@ public enum ErrorCode {
     INTERNAL_ERROR("INTERNAL_ERROR", "Error interno del servidor"),
     BAD_REQUEST("BAD_REQUEST", "Solicitud incorrecta"),
     METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED", "Método no permitido"),
-    UNSUPPORTED_MEDIA_TYPE("UNSUPPORTED_MEDIA_TYPE", "Tipo de medio no soportado");
+    UNSUPPORTED_MEDIA_TYPE("UNSUPPORTED_MEDIA_TYPE", "Tipo de medio no soportado"),
+    UNAUTHORIZED("UNAUTHORIZED", "No autenticado"),
+    FORBIDDEN("FORBIDDEN", "Acceso no permitido"),
+    CONFLICT("CONFLICT", "El recurso ya existe");
     private final String code;
     private final String description;
     ErrorCode(String code, String description) {

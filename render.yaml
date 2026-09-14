@@ -46,3 +46,7 @@ services:
       # servicio; se rellena a mano en el dashboard tras el primer deploy.
       - key: CORS_ALLOWED_ORIGINS
         sync: false
+      - key: DB_SSLMODE
+        sync: false
+      - key: TOKEN_SECRET
+        generateValue: true

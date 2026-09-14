@@ -1,4 +1,5 @@
 package com.ecoimpact_360.backend.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -23,6 +24,8 @@ public class School {
     @NotBlank
     private String name;
     private String city;
+    @JsonIgnore
+    private String password;
     @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)
     private List<Classroom> classrooms;
 }

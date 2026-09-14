@@ -6,4 +6,6 @@ import com.ecoimpact_360.backend.model.Classroom;
 @Repository
 public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
     List<Classroom> findAllByOrderByScoreDesc();
+    List<Classroom> findBySchoolId(Long schoolId);
+    List<Classroom> findBySchoolIdOrderByScoreDesc(Long schoolId);
 }

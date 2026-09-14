@@ -14,9 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.ecoimpact_360.backend.dto.AlertResponseDTO;
+import com.ecoimpact_360.backend.exception.ForbiddenException;
 import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
 import com.ecoimpact_360.backend.model.Alert;
 import com.ecoimpact_360.backend.model.Classroom;
+import com.ecoimpact_360.backend.model.School;
 import com.ecoimpact_360.backend.model.WasteEntry;
 import com.ecoimpact_360.backend.model.WasteType;
 import com.ecoimpact_360.backend.model.enums.AlertType;
@@ -29,15 +31,20 @@ class AlertServiceTest {
     private AlertService alertService;
     private WasteType wasteType;
     private Classroom classroom;
+    private School school;
     @BeforeEach
     void setUp() {
         wasteType = new WasteType();
         wasteType.setId(1L);
         wasteType.setName("Plastico");
         wasteType.setMaxKgPerWeek(10.0);
+        school = new School();
+        school.setId(9L);
+        school.setName("IES EcoImpact");
         classroom = new Classroom();
         classroom.setId(2L);
         classroom.setName("Aula 1A");
+        classroom.setSchool(school);
     }
     private WasteEntry entryWithKg(double kg) {
         WasteEntry entry = new WasteEntry();
@@ -90,8 +97,8 @@ class AlertServiceTest {
         alert.setTotalKg(12.5);
         alert.setResolved(false);
         alert.setCreatedAt(LocalDateTime.of(2026, 2, 19, 8, 0));
-        when(alertRepository.findByResolvedFalse()).thenReturn(List.of(alert));
-        List<AlertResponseDTO> result = alertService.getPendingAlerts();
+        when(alertRepository.findByResolvedFalseAndClassroomSchoolId(9L)).thenReturn(List.of(alert));
+        List<AlertResponseDTO> result = alertService.getPendingAlertsForSchool(9L);
         assertEquals(1, result.size());
         AlertResponseDTO dto = result.get(0);
         assertEquals(5L, dto.getId());
@@ -111,24 +118,35 @@ class AlertServiceTest {
         Alert pending = new Alert();
         pending.setId(2L);
         pending.setResolved(false);
-        when(alertRepository.findAll()).thenReturn(Arrays.asList(resolved, pending));
-        List<AlertResponseDTO> result = alertService.getAllAlerts();
+        when(alertRepository.findByClassroomSchoolId(9L)).thenReturn(Arrays.asList(resolved, pending));
+        List<AlertResponseDTO> result = alertService.getAllAlertsForSchool(9L);
         assertEquals(2, result.size());
     }
     @Test
     void resolveAlert_MarksAlertAsResolved() {
         Alert alert = new Alert();
         alert.setId(7L);
+        alert.setClassroom(classroom);
         alert.setResolved(false);
         when(alertRepository.findById(7L)).thenReturn(Optional.of(alert));
-        alertService.resolveAlert(7L);
+        alertService.resolveAlert(7L, 9L);
         assertTrue(alert.getResolved());
         verify(alertRepository).save(alert);
     }
     @Test
     void resolveAlert_ThrowsResourceNotFound_WhenIdDoesNotExist() {
         when(alertRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> alertService.resolveAlert(99L));
+        assertThrows(ResourceNotFoundException.class, () -> alertService.resolveAlert(99L, 9L));
+        verify(alertRepository, never()).save(any());
+    }
+    @Test
+    void resolveAlert_ThrowsForbidden_WhenAlertBelongsToAnotherSchool() {
+        Alert alert = new Alert();
+        alert.setId(7L);
+        alert.setClassroom(classroom);
+        alert.setResolved(false);
+        when(alertRepository.findById(7L)).thenReturn(Optional.of(alert));
+        assertThrows(ForbiddenException.class, () -> alertService.resolveAlert(7L, 123L));
         verify(alertRepository, never()).save(any());
     }
 }

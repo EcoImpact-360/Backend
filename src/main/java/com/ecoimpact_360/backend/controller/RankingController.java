@@ -2,9 +2,11 @@ package com.ecoimpact_360.backend.controller;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ecoimpact_360.backend.dto.RankingDTO;
+import com.ecoimpact_360.backend.security.AuthInterceptor;
 import com.ecoimpact_360.backend.service.RankingService;
 import lombok.RequiredArgsConstructor;
 @RestController
@@ -13,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 public class RankingController {
     private final RankingService rankingService;
     @GetMapping
-    public ResponseEntity<List<RankingDTO>> getRanking() {
-        return ResponseEntity.ok(rankingService.getClassroomRanking());
+    public ResponseEntity<List<RankingDTO>> getRanking(@RequestAttribute(AuthInterceptor.SCHOOL_ID_ATTRIBUTE) Long schoolId) {
+        return ResponseEntity.ok(rankingService.getClassroomRankingForSchool(schoolId));
     }
 }

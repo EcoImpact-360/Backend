@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.ecoimpact_360.backend.dto.AlertResponseDTO;
 import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
+import com.ecoimpact_360.backend.security.TokenService;
 import com.ecoimpact_360.backend.service.AlertService;
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -19,8 +21,13 @@ import com.ecoimpact_360.backend.service.AlertService;
 class AlertControllerTest {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private TokenService tokenService;
     @MockBean
     private AlertService alertService;
+    private String bearer() {
+        return "Bearer " + tokenService.generateToken(1L);
+    }
     private AlertResponseDTO sampleAlert() {
         return AlertResponseDTO.builder()
                 .id(1L)
@@ -35,8 +42,8 @@ class AlertControllerTest {
     }
     @Test
     void getPendingAlerts_Returns200WithList() throws Exception {
-        when(alertService.getPendingAlerts()).thenReturn(List.of(sampleAlert()));
-        mockMvc.perform(get("/api/v1/alerts/pending"))
+        when(alertService.getPendingAlertsForSchool(1L)).thenReturn(List.of(sampleAlert()));
+        mockMvc.perform(get("/api/v1/alerts/pending").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].classroomName").value("Aula 1A"))
@@ -44,23 +51,28 @@ class AlertControllerTest {
     }
     @Test
     void getAllAlerts_Returns200WithHistory() throws Exception {
-        when(alertService.getAllAlerts()).thenReturn(List.of(sampleAlert()));
-        mockMvc.perform(get("/api/v1/alerts/history"))
+        when(alertService.getAllAlertsForSchool(1L)).thenReturn(List.of(sampleAlert()));
+        mockMvc.perform(get("/api/v1/alerts/history").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].totalKg").value(12.5));
     }
     @Test
     void resolveAlert_Returns204_WhenFound() throws Exception {
-        mockMvc.perform(patch("/api/v1/alerts/1/resolve"))
+        mockMvc.perform(patch("/api/v1/alerts/1/resolve").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isNoContent());
-        verify(alertService).resolveAlert(1L);
+        verify(alertService).resolveAlert(1L, 1L);
     }
     @Test
     void resolveAlert_Returns404_WhenNotFound() throws Exception {
         doThrow(new ResourceNotFoundException("Alert", "id", 99L))
-                .when(alertService).resolveAlert(99L);
-        mockMvc.perform(patch("/api/v1/alerts/99/resolve"))
+                .when(alertService).resolveAlert(99L, 1L);
+        mockMvc.perform(patch("/api/v1/alerts/99/resolve").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("RESOURCE_NOT_FOUND"));
+    }
+    @Test
+    void getPendingAlerts_Returns401_WhenNoToken() throws Exception {
+        mockMvc.perform(get("/api/v1/alerts/pending"))
+                .andExpect(status().isUnauthorized());
     }
 }

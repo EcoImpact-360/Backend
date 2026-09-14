@@ -1,5 +1,6 @@
 package com.ecoimpact_360.backend.service;
 import com.ecoimpact_360.backend.dto.ClassroomCreateRequest;
+import com.ecoimpact_360.backend.exception.ForbiddenException;
 import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
 import com.ecoimpact_360.backend.model.Classroom;
 import com.ecoimpact_360.backend.model.School;
@@ -13,22 +14,29 @@ import java.util.List;
 public class ClassRoomService {
     private final ClassroomRepository classroomRepository;
     private final SchoolRepository schoolRepository;
-    public List<Classroom> getAllClassrooms() {
-        return classroomRepository.findAll();
+    public List<Classroom> getClassroomsForSchool(Long schoolId) {
+        return classroomRepository.findBySchoolId(schoolId);
     }
-    public List<Classroom> getClassroomRankingByScore() {
-        return classroomRepository.findAllByOrderByScoreDesc();
+    public List<Classroom> getClassroomRankingByScoreForSchool(Long schoolId) {
+        return classroomRepository.findBySchoolIdOrderByScoreDesc(schoolId);
     }
-    public Classroom saveClassroom(Classroom classroom) {
-        return classroomRepository.save(classroom);
-    }
-    public Classroom createClassroom(ClassroomCreateRequest req) {
-        School school = schoolRepository.findById(req.getSchoolId())
-                .orElseThrow(() -> new ResourceNotFoundException("School", "id", req.getSchoolId()));
+    public Classroom createClassroom(ClassroomCreateRequest req, Long schoolId) {
+        School school = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new ResourceNotFoundException("School", "id", schoolId));
         Classroom classroom = new Classroom();
         classroom.setName(req.getName());
-        classroom.setScore(req.getScore());
+        if (req.getScore() != null) {
+            classroom.setScore(req.getScore());
+        }
         classroom.setSchool(school);
         return classroomRepository.save(classroom);
+    }
+    public Classroom getOwnedClassroomOrThrow(Long classroomId, Long schoolId) {
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom", "id", classroomId));
+        if (classroom.getSchool() == null || !classroom.getSchool().getId().equals(schoolId)) {
+            throw new ForbiddenException("Esta aula no pertenece a tu colegio");
+        }
+        return classroom;
     }
 }
