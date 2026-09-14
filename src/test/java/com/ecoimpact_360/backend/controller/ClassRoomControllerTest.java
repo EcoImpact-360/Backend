@@ -13,7 +13,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
 import com.ecoimpact_360.backend.model.Classroom;
+import com.ecoimpact_360.backend.model.School;
 import com.ecoimpact_360.backend.service.ClassRoomService;
+import java.util.ArrayList;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -69,6 +71,23 @@ class ClassRoomControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Aula 1A\",\"schoolId\":99}"))
                 .andExpect(status().isNotFound());
+    }
+    @Test
+    void getAll_DoesNotSerializeCircularSchoolReference() throws Exception {
+        School school = new School();
+        school.setId(1L);
+        school.setName("IES EcoImpact");
+        Classroom classroom = new Classroom();
+        classroom.setId(1L);
+        classroom.setName("Aula 1A");
+        classroom.setSchool(school);
+        school.setClassrooms(new ArrayList<>(List.of(classroom)));
+        when(classroomService.getAllClassrooms()).thenReturn(List.of(classroom));
+        mockMvc.perform(get("/api/v1/classrooms"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].schoolId").value(1))
+                .andExpect(jsonPath("$[0].schoolName").value("IES EcoImpact"))
+                .andExpect(jsonPath("$[0].school").doesNotExist());
     }
     @Test
     void getRanking_Returns200WithList() throws Exception {
