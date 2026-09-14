@@ -1,8 +1,11 @@
 INSERT INTO schools
-    (id, name, city)
+    (id, name, city, password)
 VALUES
-    (1, 'IES EcoImpact', 'Barcelona')
+    (1, 'IES EcoImpact', 'Barcelona', '$2a$10$shHGFSydFGeuY3kU4WkwwO/f4AvflsmnRAwsaP1ksd/XX/y61xTe.')
 ON CONFLICT DO NOTHING;
+
+UPDATE schools SET password = '$2a$10$shHGFSydFGeuY3kU4WkwwO/f4AvflsmnRAwsaP1ksd/XX/y61xTe.'
+WHERE id = 1 AND password IS NULL;
 
 INSERT INTO classrooms
     (id, name, score, school_id)
