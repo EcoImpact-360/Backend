@@ -36,7 +36,7 @@ class DashboardControllerTest {
         DashboardDTO dashboard = createMockDashboard();
         when(dashboardService.getGlobalStats()).thenReturn(dashboard);
 
-        mockMvc.perform(get("/api/dashboard/global"))
+        mockMvc.perform(get("/api/v1/dashboard/global"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(100.0))
                 .andExpect(jsonPath("$.totalCo2Equivalente").value(150.0))
@@ -63,7 +63,7 @@ class DashboardControllerTest {
                 .build();
         when(dashboardService.getGlobalStats()).thenReturn(emptyDashboard);
 
-        mockMvc.perform(get("/api/dashboard/global"))
+        mockMvc.perform(get("/api/v1/dashboard/global"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(0.0))
                 .andExpect(jsonPath("$.totalAlertasActivas").value(0))
@@ -75,7 +75,7 @@ class DashboardControllerTest {
         DashboardDTO dashboard = createMockDashboard();
         when(dashboardService.getClassroomStats(1L)).thenReturn(dashboard);
 
-        mockMvc.perform(get("/api/dashboard/classroom/1"))
+        mockMvc.perform(get("/api/v1/dashboard/classroom/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(100.0))
                 .andExpect(jsonPath("$.totalCo2Equivalente").value(150.0))
@@ -87,7 +87,7 @@ class DashboardControllerTest {
         DashboardDTO dashboard = createMockDashboard();
         when(dashboardService.getClassroomStats(999L)).thenReturn(dashboard);
 
-        mockMvc.perform(get("/api/dashboard/classroom/999"))
+        mockMvc.perform(get("/api/v1/dashboard/classroom/999"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(100.0));
     }
@@ -109,7 +109,7 @@ class DashboardControllerTest {
                 .build();
         when(dashboardService.getGlobalStats()).thenReturn(dashboard);
 
-        mockMvc.perform(get("/api/dashboard/global"))
+        mockMvc.perform(get("/api/v1/dashboard/global"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rankingAulas[0].id").value(1))
                 .andExpect(jsonPath("$.rankingAulas[0].name").value("Aula 1A"))
@@ -133,7 +133,7 @@ class DashboardControllerTest {
                 .build();
         when(dashboardService.getGlobalStats()).thenReturn(dashboard);
 
-        mockMvc.perform(get("/api/dashboard/global"))
+        mockMvc.perform(get("/api/v1/dashboard/global"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.residuosPorCategoria.PLASTIC").value(50.0))
                 .andExpect(jsonPath("$.residuosPorCategoria.PAPEL").value(30.0))
@@ -145,7 +145,7 @@ class DashboardControllerTest {
         DashboardDTO dashboard = createMockDashboard();
         when(dashboardService.getClassroomStats(0L)).thenReturn(dashboard);
 
-        mockMvc.perform(get("/api/dashboard/classroom/0"))
+        mockMvc.perform(get("/api/v1/dashboard/classroom/0"))
                 .andExpect(status().isOk());
     }
 
