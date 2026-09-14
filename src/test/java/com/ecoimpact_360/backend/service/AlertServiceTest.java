@@ -56,7 +56,7 @@ class AlertServiceTest {
     @Test
     void checkAndCreateAlert_CreatesAlert_WhenThresholdExceeded() {
         WasteEntry entry = entryWithKg(15.0);
-        when(alertRepository.existsByWasteTypeIdAndResolvedFalse(1L)).thenReturn(false);
+        when(alertRepository.existsByWasteTypeIdAndClassroomIdAndResolvedFalse(1L, 2L)).thenReturn(false);
         alertService.checkAndCreateAlert(entry);
         ArgumentCaptor<Alert> captor = ArgumentCaptor.forClass(Alert.class);
         verify(alertRepository).save(captor.capture());
@@ -76,9 +76,23 @@ class AlertServiceTest {
     @Test
     void checkAndCreateAlert_DoesNotDuplicate_WhenUnresolvedAlertAlreadyExists() {
         WasteEntry entry = entryWithKg(20.0);
-        when(alertRepository.existsByWasteTypeIdAndResolvedFalse(1L)).thenReturn(true);
+        when(alertRepository.existsByWasteTypeIdAndClassroomIdAndResolvedFalse(1L, 2L)).thenReturn(true);
         alertService.checkAndCreateAlert(entry);
         verify(alertRepository, never()).save(any());
+    }
+    @Test
+    void checkAndCreateAlert_CreatesAlert_ForDifferentClassroom_EvenIfAnotherClassroomAlreadyHasOne() {
+        Classroom otherClassroom = new Classroom();
+        otherClassroom.setId(3L);
+        otherClassroom.setName("Aula 2B");
+        otherClassroom.setSchool(school);
+        WasteEntry entry = new WasteEntry();
+        entry.setWasteType(wasteType);
+        entry.setClassroom(otherClassroom);
+        entry.setQuantityKg(15.0);
+        when(alertRepository.existsByWasteTypeIdAndClassroomIdAndResolvedFalse(1L, 3L)).thenReturn(false);
+        alertService.checkAndCreateAlert(entry);
+        verify(alertRepository).save(any(Alert.class));
     }
     @Test
     void checkAndCreateAlert_DoesNothing_WhenNoMaxConfigured() {

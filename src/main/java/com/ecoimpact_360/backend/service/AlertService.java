@@ -21,7 +21,7 @@ public class AlertService {
         Double maxAllowed = entry.getWasteType().getMaxKgPerWeek();
         if (maxAllowed != null && entry.getQuantityKg() > maxAllowed) {
             boolean alreadyHasAlert = alertRepository
-                .existsByWasteTypeIdAndResolvedFalse(entry.getWasteType().getId());
+                .existsByWasteTypeIdAndClassroomIdAndResolvedFalse(entry.getWasteType().getId(), entry.getClassroom().getId());
             if (!alreadyHasAlert) {
                 Alert alert = new Alert();
                 alert.setWasteType(entry.getWasteType());
