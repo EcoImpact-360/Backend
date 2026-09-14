@@ -9,12 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.ecoimpact_360.backend.exception.ConflictException;
 import com.ecoimpact_360.backend.model.School;
 import com.ecoimpact_360.backend.repository.SchoolRepository;
+import com.ecoimpact_360.backend.security.TokenService;
 import com.ecoimpact_360.backend.service.SchoolService;
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -22,19 +24,29 @@ import com.ecoimpact_360.backend.service.SchoolService;
 class SchoolControllerTest {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private TokenService tokenService;
     @MockBean
     private SchoolRepository schoolRepository;
     @MockBean
     private SchoolService schoolService;
+    private String bearer() {
+        return "Bearer " + tokenService.generateToken(1L);
+    }
     @Test
-    void getAllSchools_Returns200WithList() throws Exception {
+    void getAllSchools_Returns200WithList_WhenAuthenticated() throws Exception {
         School school = new School();
         school.setId(1L);
         school.setName("Colegio Central");
         when(schoolRepository.findAll()).thenReturn(List.of(school));
-        mockMvc.perform(get("/api/v1/schools"))
+        mockMvc.perform(get("/api/v1/schools").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Colegio Central"));
+    }
+    @Test
+    void getAllSchools_Returns401_WhenNoToken() throws Exception {
+        mockMvc.perform(get("/api/v1/schools"))
+                .andExpect(status().isUnauthorized());
     }
     @Test
     void getSchoolById_Returns200_WhenFound() throws Exception {
@@ -42,18 +54,18 @@ class SchoolControllerTest {
         school.setId(1L);
         school.setName("Colegio Central");
         when(schoolRepository.findById(1L)).thenReturn(Optional.of(school));
-        mockMvc.perform(get("/api/v1/schools/1"))
+        mockMvc.perform(get("/api/v1/schools/1").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Colegio Central"));
     }
     @Test
     void getSchoolById_Returns404_WhenNotFound() throws Exception {
         when(schoolRepository.findById(99L)).thenReturn(Optional.empty());
-        mockMvc.perform(get("/api/v1/schools/99"))
+        mockMvc.perform(get("/api/v1/schools/99").header(HttpHeaders.AUTHORIZATION, bearer()))
                 .andExpect(status().isNotFound());
     }
     @Test
-    void createSchool_Returns200_WhenValid() throws Exception {
+    void createSchool_Returns200_WhenValid_NoTokenNeeded() throws Exception {
         School saved = new School();
         saved.setId(1L);
         saved.setName("Colegio Central");

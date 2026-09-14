@@ -22,7 +22,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || isPublicSchoolRegistration(request)) {
             return true;
         }
         String header = request.getHeader("Authorization");
@@ -37,6 +37,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             writeUnauthorized(response, request, ex.getMessage());
             return false;
         }
+    }
+
+    private boolean isPublicSchoolRegistration(HttpServletRequest request) {
+        return "POST".equalsIgnoreCase(request.getMethod()) && "/api/v1/schools".equals(request.getRequestURI());
     }
 
     private void writeUnauthorized(HttpServletResponse response, HttpServletRequest request, String message) throws Exception {

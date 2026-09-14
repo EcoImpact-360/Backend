@@ -18,8 +18,6 @@ public class AuthConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/v1/**")
                 .excludePathPatterns(
                         "/api/v1/auth/login",
-                        "/api/v1/schools",
-                        "/api/v1/schools/**",
                         "/api/v1/waste-types"
                 );
     }
