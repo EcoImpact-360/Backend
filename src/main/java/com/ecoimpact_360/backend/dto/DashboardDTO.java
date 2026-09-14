@@ -1,13 +1,10 @@
 package com.ecoimpact_360.backend.dto;
-
 import java.util.List;
 import java.util.Map;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 @Getter
 @Builder
 @NoArgsConstructor
@@ -21,7 +18,6 @@ public class DashboardDTO {
     private Long totalAlertasActivas;
     private List<ClassroomRankingDTO> rankingAulas;
     private Map<String, Double> residuosPorCategoria;
-    
     @Getter
     @Builder
     @NoArgsConstructor

@@ -1,14 +1,11 @@
 package com.ecoimpact_360.backend.controller;
-
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,26 +13,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-
 import com.ecoimpact_360.backend.dto.DashboardDTO;
 import com.ecoimpact_360.backend.service.DashboardService;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class DashboardControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     private DashboardService dashboardService;
-
     @Test
     void getGlobalDashboard_Returns200() throws Exception {
         DashboardDTO dashboard = createMockDashboard();
         when(dashboardService.getGlobalStats()).thenReturn(dashboard);
-
         mockMvc.perform(get("/api/v1/dashboard/global"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(100.0))
@@ -48,7 +39,6 @@ class DashboardControllerTest {
                 .andExpect(jsonPath("$.rankingAulas").isNotEmpty())
                 .andExpect(jsonPath("$.residuosPorCategoria").isMap());
     }
-
     @Test
     void getGlobalDashboard_ReturnsEmptyMetrics_WhenNoData() throws Exception {
         DashboardDTO emptyDashboard = DashboardDTO.builder()
@@ -62,36 +52,30 @@ class DashboardControllerTest {
                 .residuosPorCategoria(new HashMap<>())
                 .build();
         when(dashboardService.getGlobalStats()).thenReturn(emptyDashboard);
-
         mockMvc.perform(get("/api/v1/dashboard/global"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(0.0))
                 .andExpect(jsonPath("$.totalAlertasActivas").value(0))
                 .andExpect(jsonPath("$.rankingAulas").isEmpty());
     }
-
     @Test
     void getClassroomDashboard_Returns200() throws Exception {
         DashboardDTO dashboard = createMockDashboard();
         when(dashboardService.getClassroomStats(1L)).thenReturn(dashboard);
-
         mockMvc.perform(get("/api/v1/dashboard/classroom/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(100.0))
                 .andExpect(jsonPath("$.totalCo2Equivalente").value(150.0))
                 .andExpect(jsonPath("$.rankingAulas").isArray());
     }
-
     @Test
     void getClassroomDashboard_WithInvalidId_ReturnsData() throws Exception {
         DashboardDTO dashboard = createMockDashboard();
         when(dashboardService.getClassroomStats(999L)).thenReturn(dashboard);
-
         mockMvc.perform(get("/api/v1/dashboard/classroom/999"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalKgRecolectados").value(100.0));
     }
-
     @Test
     void getGlobalDashboard_ContainsCorrectRankingAulas() throws Exception {
         DashboardDTO dashboard = DashboardDTO.builder()
@@ -108,7 +92,6 @@ class DashboardControllerTest {
                 .residuosPorCategoria(new HashMap<>())
                 .build();
         when(dashboardService.getGlobalStats()).thenReturn(dashboard);
-
         mockMvc.perform(get("/api/v1/dashboard/global"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rankingAulas[0].id").value(1))
@@ -118,7 +101,6 @@ class DashboardControllerTest {
                 .andExpect(jsonPath("$.rankingAulas[1].name").value("Aula 2B"))
                 .andExpect(jsonPath("$.rankingAulas[1].score").value(50));
     }
-
     @Test
     void getGlobalDashboard_ContainsResiduosPorCategoria() throws Exception {
         DashboardDTO dashboard = DashboardDTO.builder()
@@ -132,23 +114,19 @@ class DashboardControllerTest {
                 .residuosPorCategoria(createResiduosPorCategoria())
                 .build();
         when(dashboardService.getGlobalStats()).thenReturn(dashboard);
-
         mockMvc.perform(get("/api/v1/dashboard/global"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.residuosPorCategoria.PLASTIC").value(50.0))
                 .andExpect(jsonPath("$.residuosPorCategoria.PAPEL").value(30.0))
                 .andExpect(jsonPath("$.residuosPorCategoria.VIDRIO").value(20.0));
     }
-
     @Test
     void getClassroomDashboard_WithZeroId_Returns200() throws Exception {
         DashboardDTO dashboard = createMockDashboard();
         when(dashboardService.getClassroomStats(0L)).thenReturn(dashboard);
-
         mockMvc.perform(get("/api/v1/dashboard/classroom/0"))
                 .andExpect(status().isOk());
     }
-
     private DashboardDTO createMockDashboard() {
         return DashboardDTO.builder()
                 .totalKgRecolectados(100.0)
@@ -163,7 +141,6 @@ class DashboardControllerTest {
                 .residuosPorCategoria(createResiduosPorCategoria())
                 .build();
     }
-
     private Map<String, Double> createResiduosPorCategoria() {
         Map<String, Double> map = new HashMap<>();
         map.put("PLASTIC", 50.0);

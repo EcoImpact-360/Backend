@@ -1,12 +1,9 @@
 package com.ecoimpact_360.backend.dto;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.Instant;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
