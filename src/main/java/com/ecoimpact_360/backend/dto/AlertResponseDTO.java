@@ -15,6 +15,8 @@ public class AlertResponseDTO {
     private Long wasteTypeId;
     private String wasteTypeName;
     private String alertType;
+    private String title;
+    private String message;
     private Double totalKg;
     private Boolean resolved;
     private LocalDateTime createdAt;

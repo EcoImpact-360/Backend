@@ -30,6 +30,8 @@ public class Alert {
     private Classroom classroom;
     @Enumerated(EnumType.STRING)
     private AlertType alertType;
+    private String title;
+    private String message;
     private Double totalKg;
     private Boolean resolved = false;
     private LocalDateTime createdAt;

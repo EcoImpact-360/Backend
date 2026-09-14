@@ -9,9 +9,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ecoimpact_360.backend.dto.AlertCreateRequest;
 import com.ecoimpact_360.backend.dto.AlertResponseDTO;
+import com.ecoimpact_360.backend.dto.AlertUpdateRequest;
+import com.ecoimpact_360.backend.exception.ForbiddenException;
 import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
 import com.ecoimpact_360.backend.security.TokenService;
 import com.ecoimpact_360.backend.service.AlertService;
@@ -23,6 +28,8 @@ class AlertControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private ObjectMapper objectMapper;
     @MockBean
     private AlertService alertService;
     private String bearer() {
@@ -74,5 +81,79 @@ class AlertControllerTest {
     void getPendingAlerts_Returns401_WhenNoToken() throws Exception {
         mockMvc.perform(get("/api/v1/alerts/pending"))
                 .andExpect(status().isUnauthorized());
+    }
+    @Test
+    void createAlert_Returns201_WithCreatedAlert() throws Exception {
+        AlertCreateRequest req = new AlertCreateRequest();
+        req.setClassroomId(2L);
+        req.setTitle("Aviso manual");
+        req.setMessage("Revisar el aula");
+        when(alertService.createManualAlert(any(), eq(1L))).thenReturn(sampleAlert());
+        mockMvc.perform(post("/api/v1/alerts")
+                        .header(HttpHeaders.AUTHORIZATION, bearer())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1));
+    }
+    @Test
+    void createAlert_Returns400_WhenTitleMissing() throws Exception {
+        AlertCreateRequest req = new AlertCreateRequest();
+        req.setClassroomId(2L);
+        mockMvc.perform(post("/api/v1/alerts")
+                        .header(HttpHeaders.AUTHORIZATION, bearer())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+    }
+    @Test
+    void createAlert_Returns403_WhenClassroomBelongsToAnotherSchool() throws Exception {
+        AlertCreateRequest req = new AlertCreateRequest();
+        req.setClassroomId(99L);
+        req.setTitle("Aviso manual");
+        when(alertService.createManualAlert(any(), eq(1L)))
+                .thenThrow(new ForbiddenException("Esta aula no pertenece a tu colegio"));
+        mockMvc.perform(post("/api/v1/alerts")
+                        .header(HttpHeaders.AUTHORIZATION, bearer())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isForbidden());
+    }
+    @Test
+    void updateAlert_Returns200_WithUpdatedAlert() throws Exception {
+        AlertUpdateRequest req = new AlertUpdateRequest();
+        req.setTitle("Titulo actualizado");
+        when(alertService.updateAlert(eq(1L), any(), eq(1L))).thenReturn(sampleAlert());
+        mockMvc.perform(put("/api/v1/alerts/1")
+                        .header(HttpHeaders.AUTHORIZATION, bearer())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+    }
+    @Test
+    void updateAlert_Returns404_WhenNotFound() throws Exception {
+        AlertUpdateRequest req = new AlertUpdateRequest();
+        req.setTitle("Titulo actualizado");
+        when(alertService.updateAlert(eq(99L), any(), eq(1L)))
+                .thenThrow(new ResourceNotFoundException("Alert", "id", 99L));
+        mockMvc.perform(put("/api/v1/alerts/99")
+                        .header(HttpHeaders.AUTHORIZATION, bearer())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    void deleteAlert_Returns204_WhenFound() throws Exception {
+        mockMvc.perform(delete("/api/v1/alerts/1").header(HttpHeaders.AUTHORIZATION, bearer()))
+                .andExpect(status().isNoContent());
+        verify(alertService).deleteAlert(1L, 1L);
+    }
+    @Test
+    void deleteAlert_Returns403_WhenAlertBelongsToAnotherSchool() throws Exception {
+        doThrow(new ForbiddenException("Esta alerta no pertenece a tu colegio"))
+                .when(alertService).deleteAlert(1L, 1L);
+        mockMvc.perform(delete("/api/v1/alerts/1").header(HttpHeaders.AUTHORIZATION, bearer()))
+                .andExpect(status().isForbidden());
     }
 }
