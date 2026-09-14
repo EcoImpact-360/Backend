@@ -132,6 +132,15 @@ class AlertControllerTest {
                 .andExpect(jsonPath("$.id").value(1));
     }
     @Test
+    void updateAlert_Returns400_WhenTitleMissing() throws Exception {
+        AlertUpdateRequest req = new AlertUpdateRequest();
+        mockMvc.perform(put("/api/v1/alerts/1")
+                        .header(HttpHeaders.AUTHORIZATION, bearer())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+    }
+    @Test
     void updateAlert_Returns404_WhenNotFound() throws Exception {
         AlertUpdateRequest req = new AlertUpdateRequest();
         req.setTitle("Titulo actualizado");

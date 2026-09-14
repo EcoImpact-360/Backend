@@ -63,17 +63,17 @@ public class AlertService {
     @Transactional
     public AlertResponseDTO updateAlert(Long id, AlertUpdateRequest req, Long schoolId) {
         Alert alert = getOwnedAlertOrThrow(id, schoolId);
-        if (req.getTitle() != null && !req.getTitle().isBlank()) {
-            alert.setTitle(req.getTitle());
+        WasteType wasteType = null;
+        if (req.getWasteTypeId() != null) {
+            wasteType = wasteTypeRepository.findById(req.getWasteTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("WasteType", "id", req.getWasteTypeId()));
         }
-        if (req.getMessage() != null) {
-            alert.setMessage(req.getMessage());
-        }
+        alert.setTitle(req.getTitle());
+        alert.setMessage(req.getMessage());
+        alert.setWasteType(wasteType);
+        alert.setTotalKg(req.getTotalKg());
         if (req.getAlertType() != null && !req.getAlertType().isBlank()) {
             alert.setAlertType(parseAlertType(req.getAlertType()));
-        }
-        if (req.getTotalKg() != null) {
-            alert.setTotalKg(req.getTotalKg());
         }
         return toDto(alertRepository.save(alert));
     }

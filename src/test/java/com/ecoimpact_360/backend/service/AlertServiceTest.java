@@ -212,23 +212,66 @@ class AlertServiceTest {
         verify(alertRepository, never()).save(any());
     }
     @Test
-    void updateAlert_AppliesProvidedFields() {
+    void updateAlert_ReplacesTitleMessageWasteTypeAndTotalKg() {
         Alert alert = new Alert();
         alert.setId(7L);
         alert.setClassroom(classroom);
+        alert.setWasteType(wasteType);
         alert.setTitle("Titulo viejo");
+        alert.setMessage("Mensaje viejo");
+        alert.setTotalKg(1.0);
+        alert.setResolved(false);
+        WasteType newWasteType = new WasteType();
+        newWasteType.setId(9L);
+        newWasteType.setName("Papel");
+        when(alertRepository.findById(7L)).thenReturn(Optional.of(alert));
+        when(wasteTypeRepository.findById(9L)).thenReturn(Optional.of(newWasteType));
+        when(alertRepository.save(any(Alert.class))).thenAnswer(inv -> inv.getArgument(0));
+        AlertUpdateRequest req = new AlertUpdateRequest();
+        req.setTitle("Titulo nuevo");
+        req.setMessage("Mensaje nuevo");
+        req.setWasteTypeId(9L);
+        req.setTotalKg(9.5);
+        AlertResponseDTO dto = alertService.updateAlert(7L, req, 9L);
+        assertEquals("Titulo nuevo", dto.getTitle());
+        assertEquals("Mensaje nuevo", dto.getMessage());
+        assertEquals(9L, dto.getWasteTypeId());
+        assertEquals("Papel", dto.getWasteTypeName());
+        assertEquals(9.5, dto.getTotalKg());
+        verify(alertRepository).save(alert);
+    }
+    @Test
+    void updateAlert_ClearsMessageWasteTypeAndTotalKg_WhenNotProvided() {
+        Alert alert = new Alert();
+        alert.setId(7L);
+        alert.setClassroom(classroom);
+        alert.setWasteType(wasteType);
+        alert.setTitle("Titulo viejo");
+        alert.setMessage("Mensaje viejo");
+        alert.setTotalKg(1.0);
         alert.setResolved(false);
         when(alertRepository.findById(7L)).thenReturn(Optional.of(alert));
         when(alertRepository.save(any(Alert.class))).thenAnswer(inv -> inv.getArgument(0));
         AlertUpdateRequest req = new AlertUpdateRequest();
         req.setTitle("Titulo nuevo");
-        req.setMessage("Mensaje nuevo");
-        req.setTotalKg(9.5);
         AlertResponseDTO dto = alertService.updateAlert(7L, req, 9L);
         assertEquals("Titulo nuevo", dto.getTitle());
-        assertEquals("Mensaje nuevo", dto.getMessage());
-        assertEquals(9.5, dto.getTotalKg());
-        verify(alertRepository).save(alert);
+        assertNull(dto.getMessage());
+        assertNull(dto.getWasteTypeId());
+        assertNull(dto.getTotalKg());
+    }
+    @Test
+    void updateAlert_ThrowsResourceNotFound_WhenWasteTypeIdInvalid() {
+        Alert alert = new Alert();
+        alert.setId(7L);
+        alert.setClassroom(classroom);
+        when(alertRepository.findById(7L)).thenReturn(Optional.of(alert));
+        when(wasteTypeRepository.findById(99L)).thenReturn(Optional.empty());
+        AlertUpdateRequest req = new AlertUpdateRequest();
+        req.setTitle("Titulo nuevo");
+        req.setWasteTypeId(99L);
+        assertThrows(ResourceNotFoundException.class, () -> alertService.updateAlert(7L, req, 9L));
+        verify(alertRepository, never()).save(any());
     }
     @Test
     void updateAlert_ThrowsForbidden_WhenAlertBelongsToAnotherSchool() {
