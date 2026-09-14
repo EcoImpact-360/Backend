@@ -25,7 +25,7 @@ class CorsConfigTest {
                         .header("Access-Control-Request-Headers", "Content-Type"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", ALLOWED_ORIGIN))
-                .andExpect(header().string("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS"))
+                .andExpect(header().string("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS"))
                 .andExpect(header().string("Access-Control-Allow-Credentials", "true"))
                 .andExpect(header().exists("Access-Control-Max-Age"));
     }
@@ -57,8 +57,20 @@ class CorsConfigTest {
                         org.hamcrest.Matchers.containsString("PUT")))
                 .andExpect(header().string("Access-Control-Allow-Methods", 
                         org.hamcrest.Matchers.containsString("DELETE")))
-                .andExpect(header().string("Access-Control-Allow-Methods", 
-                        org.hamcrest.Matchers.containsString("OPTIONS")));
+                .andExpect(header().string("Access-Control-Allow-Methods",
+                        org.hamcrest.Matchers.containsString("OPTIONS")))
+                .andExpect(header().string("Access-Control-Allow-Methods",
+                        org.hamcrest.Matchers.containsString("PATCH")));
+    }
+    @Test
+    void preflightRequest_ForPatchMethod_ReturnsCorsHeaders() throws Exception {
+        mockMvc.perform(options(API_PATH)
+                        .header("Origin", ALLOWED_ORIGIN)
+                        .header("Access-Control-Request-Method", "PATCH"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", ALLOWED_ORIGIN))
+                .andExpect(header().string("Access-Control-Allow-Methods",
+                        org.hamcrest.Matchers.containsString("PATCH")));
     }
     @Test
     void corsHeaders_AllowCredentials() throws Exception {
