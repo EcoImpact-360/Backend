@@ -11,6 +11,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -120,6 +121,20 @@ public class GlobalExceptionHandler {
                 Map.of("cause", ex.getMessage())
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorDTO> handleNoResourceFound(NoResourceFoundException ex, HttpServletRequest request) {
+        logger.warn("Ruta no encontrada: {} {}", request.getMethod(), request.getRequestURI());
+        ApiErrorDTO error = new ApiErrorDTO(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                "Ruta no encontrada",
+                request.getRequestURI(),
+                ErrorCode.RESOURCE_NOT_FOUND.getCode(),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorDTO> handleGenericException(Exception ex, HttpServletRequest request) {

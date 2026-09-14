@@ -153,6 +153,15 @@ class GlobalExceptionHandlerTest {
         assertTrue(details.containsKey("cause"));
     }
     @Test
+    void handleNoResourceFound_Returns404() {
+        org.springframework.web.servlet.resource.NoResourceFoundException ex =
+                new org.springframework.web.servlet.resource.NoResourceFoundException(
+                        org.springframework.http.HttpMethod.GET, "favicon.ico");
+        ResponseEntity<ApiErrorDTO> response = globalExceptionHandler.handleNoResourceFound(ex, mockRequest);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("RESOURCE_NOT_FOUND", response.getBody().getErrorCode());
+    }
+    @Test
     void handleGenericException_Returns500() {
         Exception ex = new RuntimeException("Something went wrong");
         ResponseEntity<ApiErrorDTO> response = globalExceptionHandler.handleGenericException(ex, mockRequest);
