@@ -3,6 +3,7 @@ package com.ecoimpact_360.backend.controller;
 import com.ecoimpact_360.backend.model.Classroom;
 import com.ecoimpact_360.backend.dto.ClassroomCreateRequest;
 import com.ecoimpact_360.backend.service.ClassRoomService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class ClassRoomController {
     }
 
     @PostMapping
-    public ResponseEntity<Classroom> create(@RequestBody ClassroomCreateRequest req) {
+    public ResponseEntity<Classroom> create(@Valid @RequestBody ClassroomCreateRequest req) {
         Classroom saved = classroomService.createClassroom(req);
         return ResponseEntity.status(201).body(saved);
     }

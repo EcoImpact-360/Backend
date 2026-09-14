@@ -14,6 +14,7 @@ import com.ecoimpact_360.backend.dto.WasteEntryRequestDTO;
 import com.ecoimpact_360.backend.dto.WasteEntryResponseDTO;
 import com.ecoimpact_360.backend.service.WasteEntryService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,7 +25,7 @@ public class WasteEntryController {
     private final WasteEntryService wasteEntryService;
 
     @PostMapping
-    public ResponseEntity<WasteEntryResponseDTO> createEntry(@RequestBody WasteEntryRequestDTO request) {
+    public ResponseEntity<WasteEntryResponseDTO> createEntry(@Valid @RequestBody WasteEntryRequestDTO request) {
         WasteEntryResponseDTO response = wasteEntryService.createWasteEntry(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

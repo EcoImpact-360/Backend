@@ -2,6 +2,7 @@ package com.ecoimpact_360.backend.service;
 
 import com.ecoimpact_360.backend.dto.WasteEntryRequestDTO;
 import com.ecoimpact_360.backend.dto.WasteEntryResponseDTO;
+import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
 import com.ecoimpact_360.backend.model.Classroom;
 import com.ecoimpact_360.backend.model.WasteEntry;
 import com.ecoimpact_360.backend.model.WasteType;
@@ -29,10 +30,10 @@ public class WasteEntryService {
     public WasteEntryResponseDTO createWasteEntry(WasteEntryRequestDTO dto) {
         
         WasteType type = wasteTypeRepository.findById(dto.getWasteTypeId())
-                .orElseThrow(() -> new RuntimeException("Tipo de residuo no encontrado"));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("WasteType", "id", dto.getWasteTypeId()));
+
         Classroom classroom = classroomRepository.findById(dto.getClassroomId())
-                .orElseThrow(() -> new RuntimeException("Aula no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom", "id", dto.getClassroomId()));
 
         
         double co2 = impactService.calculateCo2(type, dto.getQuantityKg());

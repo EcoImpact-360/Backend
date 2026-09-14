@@ -1,5 +1,6 @@
 package com.ecoimpact_360.backend.controller;
 
+import com.ecoimpact_360.backend.exception.ResourceNotFoundException;
 import com.ecoimpact_360.backend.model.Alert;
 import com.ecoimpact_360.backend.repository.AlertRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class AlertController {
     @PatchMapping("/{id}/resolve")
     public ResponseEntity<Void> resolveAlert(@PathVariable Long id) {
         Alert alert = alertRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Alert not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Alert", "id", id));
         
         alert.setResolved(true);
         alertRepository.save(alert);

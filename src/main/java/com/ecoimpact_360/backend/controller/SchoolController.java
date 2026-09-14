@@ -2,6 +2,7 @@ package com.ecoimpact_360.backend.controller;
 
 import com.ecoimpact_360.backend.model.School;
 import com.ecoimpact_360.backend.repository.SchoolRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class SchoolController {
     }
 
     @PostMapping
-    public ResponseEntity<School> createSchool(@RequestBody School school) {
+    public ResponseEntity<School> createSchool(@Valid @RequestBody School school) {
         School savedSchool = schoolRepository.save(school);
         return ResponseEntity.ok(savedSchool);
     }
