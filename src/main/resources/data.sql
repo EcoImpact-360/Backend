@@ -52,7 +52,7 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 
-INSERT INTO waste_entries (co2equivalent, created_at, quantity_kg, status, classroom_id, waste_type_id) VALUES  (9.2, NOW(), 2.1, 'PENDING', 1, 5);
-INSERT INTO waste_entries (co2equivalent, created_at, quantity_kg, status, classroom_id, waste_type_id) VALUES  (3.8, NOW(), 5.9, 'PENDING', 3, 4);
-INSERT INTO waste_entries (co2equivalent, created_at, quantity_kg, status, classroom_id, waste_type_id) VALUES  (6.9, NOW(), 7.3, 'PENDING', 4, 2);
-INSERT INTO waste_entries (co2equivalent, created_at, quantity_kg, status, classroom_id, waste_type_id) VALUES  (7.5, NOW(), 1.1, 'PENDING', 2, 1);
+INSERT INTO waste_entries (id, co2equivalent, created_at, quantity_kg, status, classroom_id, waste_type_id) VALUES (101, 9.2, NOW(), 2.1, 'PENDING', 1, 5) ON CONFLICT DO NOTHING;
+INSERT INTO waste_entries (id, co2equivalent, created_at, quantity_kg, status, classroom_id, waste_type_id) VALUES (102, 3.8, NOW(), 5.9, 'PENDING', 3, 4) ON CONFLICT DO NOTHING;
+INSERT INTO waste_entries (id, co2equivalent, created_at, quantity_kg, status, classroom_id, waste_type_id) VALUES (103, 6.9, NOW(), 7.3, 'PENDING', 4, 2) ON CONFLICT DO NOTHING;
+INSERT INTO waste_entries (id, co2equivalent, created_at, quantity_kg, status, classroom_id, waste_type_id) VALUES (104, 7.5, NOW(), 1.1, 'PENDING', 2, 1) ON CONFLICT DO NOTHING;

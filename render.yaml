@@ -1,0 +1,48 @@
+# Blueprint de Render para el backend + su base de datos.
+# En el dashboard de Render: New > Blueprint > conecta este repo (Backend).
+# Render detecta este archivo y crea ambos recursos de una vez.
+#
+# El frontend (repo aparte) NO va aqui: se despliega como Static Site
+# desde el repo Frontend siguiendo los pasos manuales en DEPLOY.md,
+# porque Render Blueprints no cruzan repos de forma fiable cuando
+# backend y frontend viven en repos de GitHub distintos.
+
+databases:
+  - name: ecoimpact-db
+    databaseName: ecoimpact_db
+    plan: free
+
+services:
+  - type: web
+    name: ecoimpact-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: ecoimpact-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: ecoimpact-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: ecoimpact-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: ecoimpact-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ecoimpact-db
+          property: password
+      # Dominio del frontend ya desplegado (Static Site en Render, o el
+      # que sea). No se puede autocompletar porque vive en otro repo/
+      # servicio; se rellena a mano en el dashboard tras el primer deploy.
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
