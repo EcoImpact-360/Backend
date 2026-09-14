@@ -161,6 +161,29 @@ class DashboardServiceTest {
         assertEquals(20.0, result.getResiduosPorCategoria().get("GLASS"));
     }
     @Test
+    void getClassroomStats_ResiduosPorCategoria_MapsCorrectly() {
+        when(wasteEntryRepository.sumKgByClassroom(1L)).thenReturn(50.0);
+        when(wasteEntryRepository.sumCo2ByClassroom(1L)).thenReturn(75.0);
+        when(classroomRepository.findById(1L)).thenReturn(java.util.Optional.of(classroom1));
+        when(classroomRepository.findAllByOrderByScoreDesc()).thenReturn(Arrays.asList(classroom1, classroom2));
+        when(wasteEntryRepository.sumKgByClassroomAndCategory(1L, WasteCategory.PLASTIC)).thenReturn(30.0);
+        when(wasteEntryRepository.sumKgByClassroomAndCategory(1L, WasteCategory.PAPER)).thenReturn(20.0);
+        when(wasteEntryRepository.sumKgByClassroomAndCategory(1L, WasteCategory.GLASS)).thenReturn(0.0);
+        when(wasteEntryRepository.sumKgByClassroomAndCategory(1L, WasteCategory.ORGANIC)).thenReturn(0.0);
+        when(wasteEntryRepository.sumKgByClassroomAndCategory(1L, WasteCategory.GENERAL)).thenReturn(0.0);
+        when(impactService.calculateTreesEquivalent(75.0)).thenReturn(3.75);
+        when(impactService.calculateKmCarEquivalent(75.0)).thenReturn(625.0);
+        when(impactService.calculateWaterSaved("PLASTIC", 30.0)).thenReturn(60.0);
+        when(impactService.calculateWaterSaved("PAPER", 20.0)).thenReturn(520.0);
+        DashboardDTO result = dashboardService.getClassroomStats(1L);
+        assertNotNull(result.getResiduosPorCategoria());
+        assertEquals(5, result.getResiduosPorCategoria().size());
+        assertEquals(30.0, result.getResiduosPorCategoria().get("PLASTIC"));
+        assertEquals(20.0, result.getResiduosPorCategoria().get("PAPER"));
+        assertEquals(0.0, result.getResiduosPorCategoria().get("GLASS"));
+        assertEquals(580.0, result.getTotalAguaAhorrada());
+    }
+    @Test
     void getGlobalStats_RankingAulas_OrderedByScoreDesc() {
         when(wasteEntryRepository.sumAllKg()).thenReturn(100.0);
         when(wasteEntryRepository.sumAllCo2()).thenReturn(100.0);

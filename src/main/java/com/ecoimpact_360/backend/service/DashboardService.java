@@ -80,11 +80,9 @@ public class DashboardService {
     }
     private Map<String, Double> getResiduosPorCategoriaClassroom(Long classroomId) {
         Map<String, Double> result = new LinkedHashMap<>();
-        List<Classroom> classroom = classroomRepository.findAll().stream()
-                .filter(c -> c.getId().equals(classroomId))
-                .collect(Collectors.toList());
         for (WasteCategory category : WasteCategory.values()) {
-            result.put(category.name(), 0.0);
+            Double kg = wasteEntryRepository.sumKgByClassroomAndCategory(classroomId, category);
+            result.put(category.name(), kg != null ? kg : 0.0);
         }
         return result;
     }
@@ -99,10 +97,13 @@ public class DashboardService {
         return total;
     }
     private Double calculateAguaAhorradaClassroom(Long classroomId) {
-        Double totalKg = wasteEntryRepository.sumKgByClassroom(classroomId);
-        if (totalKg == null || totalKg == 0) {
-            return 0.0;
+        Double total = 0.0;
+        for (WasteCategory category : WasteCategory.values()) {
+            Double kg = wasteEntryRepository.sumKgByClassroomAndCategory(classroomId, category);
+            if (kg != null && kg > 0) {
+                total += impactService.calculateWaterSaved(category.name(), kg);
+            }
         }
-        return impactService.calculateWaterSaved("GENERAL", totalKg);
+        return total;
     }
 }

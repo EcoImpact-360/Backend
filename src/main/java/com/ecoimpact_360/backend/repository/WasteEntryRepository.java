@@ -38,4 +38,8 @@ public interface WasteEntryRepository extends JpaRepository<WasteEntry, Long> {
     @Query("SELECT SUM(e.quantityKg) FROM WasteEntry e " +
            "WHERE e.wasteType.category = :category")
     Double sumKgByCategory(@Param("category") WasteCategory category);
+    @Query("SELECT SUM(e.quantityKg) FROM WasteEntry e " +
+           "WHERE e.classroom.id = :classroomId AND e.wasteType.category = :category")
+    Double sumKgByClassroomAndCategory(@Param("classroomId") Long classroomId,
+                                        @Param("category") WasteCategory category);
 }
